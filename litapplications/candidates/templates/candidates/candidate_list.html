@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% for candidate in candidates %}
+    {{ candidate }}
+  {% empty %}
+    <p>
+      No candidates yet.
+    </p>
+  {% endfor %}
+{% endblock content %}
