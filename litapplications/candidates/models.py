@@ -19,23 +19,25 @@ class Candidate(models.Model):
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30)
     status = models.IntegerField(choices=STATUS_CHOICES)
-    email = models.EmailField()
-    resume = models.TextField()
-    other_info = models.TextField()
-    memberships = models.TextField()
-    state = models.CharField(max_length=3)
-    country = models.CharField(max_length=20)
-    notes = models.TextField()
+    email = models.EmailField(blank=True)
+    resume = models.TextField(blank=True)
+    other_info = models.TextField(blank=True)
+    memberships = models.TextField(blank=True)
+    state = models.CharField(max_length=3, blank=True)
+    country = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
 
     desired_comms = models.ManyToManyField(Committee,
         help_text='Committee(s) requested by this candidate',
-        related_name='desired_comms')
+        related_name='desired_comms',
+        blank=True)
 
     potential_comms = models.ManyToManyField(Committee,
         help_text='Committee(s) being considered by LITA Appointments',
-        related_name='potential_comms')
+        related_name='potential_comms',
+        blank=True)
 
     review_complete = models.BooleanField(default=False,
         help_text='Have recommendations been finalized?')

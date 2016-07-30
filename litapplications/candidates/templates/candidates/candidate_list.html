@@ -1,11 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  {% for candidate in candidates %}
-    {{ candidate }}
-  {% empty %}
-    <p>
-      No candidates yet.
-    </p>
-  {% endfor %}
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <h2>Unreviewed</h2>
+    
+    {% for candidate in unreviewed %}
+      <a href="{{ candidate.get_aboslute_url }}">{{ candidate }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="col-xs-12 col-sm-4">
+    <h2>Review in progress</h2>
+    
+    {% for candidate in in_process %}
+      {{ candidate }}
+    {% endfor %}
+  </div>
+
+  <div class="col-xs-12 col-sm-4">
+    <h2>Done!</h2>
+    
+    {% for candidate in reviewed %}
+      {{ candidate }}
+    {% endfor %}
+  </div>
+</div>
 {% endblock content %}

@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Candidate
+
+
+class CandidateAdmin(admin.ModelAdmin):
+    search_fields = ('first_name', 'last_name')
+    list_display = ('first_name', 'last_name',)
+
+admin.site.register(Candidate, CandidateAdmin)
