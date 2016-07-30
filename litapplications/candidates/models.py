@@ -22,6 +22,7 @@ class Candidate(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES)
     email = models.EmailField(blank=True)
     resume = models.TextField(blank=True)
+    ala_appointments = models.TextField(blank=True) # Historical + current.
     other_info = models.TextField(blank=True)
     memberships = models.TextField(blank=True)
     state = models.CharField(max_length=3, blank=True)
@@ -54,6 +55,16 @@ class Candidate(models.Model):
     def get_absolute_url(self):
         return reverse_lazy('candidates:detail', args=[self.pk])
 
+
+    def place_of_origin(self):
+        if self.country and self.state:
+            return '{self.state}, {self.country}'.format(self=self)
+        elif self.country and not self.state:
+            return '{self.country}'.format(self=self)
+        elif self.state and not self.country:
+            return '{self.state}'.format(self=self)
+        else:
+            return 'unknown place of residence'
 
     def review_status(self):
         if self.review_complete:

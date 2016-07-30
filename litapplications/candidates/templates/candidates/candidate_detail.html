@@ -1,5 +1,59 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block content %}
-  {{ object }}
+  <h2>{{ object }}</h2>
+  <p>
+    From: {{ object.place_of_origin }}
+  </p>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Education &amp; experience
+    </div>
+    <div class="panel-body">
+      {{ object.resume }}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">ALA service history
+    </div>
+    <div class="panel-body">
+      {{ object.ala_appointments }}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Other info
+    </div>
+    <div class="panel-body">
+      {{ object.other_info }}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Division/RT memberships
+    </div>
+    <div class="panel-body">
+      {{ object.memberships }}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Notes
+    </div>
+    <div class="panel-body">
+      <form method="post" action="{% url 'candidates:update_notes' object.pk %}">
+        {% csrf_token %}
+        {{ notes_form | crispy }}
+        <input type="submit" value="update notes" class="btn btn-default">
+      </form>
+    </div>
+  </div>
 {% endblock content %}
