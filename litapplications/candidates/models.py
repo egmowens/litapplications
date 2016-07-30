@@ -30,10 +30,12 @@ class Candidate(models.Model):
     last_updated = models.DateField(auto_now=True)
 
     desired_comms = models.ManyToManyField(Committee,
-        help_text='Committee(s) requested by this candidate')
+        help_text='Committee(s) requested by this candidate',
+        related_name='desired_comms')
 
     potential_comms = models.ManyToManyField(Committee,
-        help_text='Committee(s) being considered by LITA Appointments')
+        help_text='Committee(s) being considered by LITA Appointments',
+        related_name='potential_comms')
 
     review_complete = models.BooleanField(default=False,
         help_text='Have recommendations been finalized?')
