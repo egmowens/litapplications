@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     # local
     'litapplications.candidates',
+    'litapplications.committees',
 ]
 
 MIDDLEWARE_CLASSES = [
