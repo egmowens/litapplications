@@ -6,7 +6,14 @@
     <h2>Unreviewed</h2>
     
     {% for candidate in unreviewed %}
-      <a href="{{ candidate.get_aboslute_url }}">{{ candidate }}</a>
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+    {% empty %}
+      <p>
+        All reviewed! Awesome job!
+      </p>
+      <p class="large">
+        🙌🏻 🙌🏼 🙌🏽 🙌🏾 🙌🏿</span>
+      </p>
     {% endfor %}
   </div>
 
@@ -14,15 +21,15 @@
     <h2>Review in progress</h2>
     
     {% for candidate in in_process %}
-      {{ candidate }}
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
     {% endfor %}
   </div>
 
   <div class="col-xs-12 col-sm-4">
-    <h2>Done!</h2>
+    <h2>Done! {% if reviewed %}&#127881;{% endif %}</h2>
     
     {% for candidate in reviewed %}
-      {{ candidate }}
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
     {% endfor %}
   </div>
 </div>

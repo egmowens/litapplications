@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
 from litapplications.committees.models import Committee
@@ -49,6 +50,11 @@ class Candidate(models.Model):
     def __str__(self):
         return '{self.first_name} {self.last_name}'.format(self=self)
     
+
+    def get_absolute_url(self):
+        return reverse_lazy('candidates:detail', args=[self.pk])
+
+
     def review_status(self):
         if self.review_complete:
             return self.REVIEWED
