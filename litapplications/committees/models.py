@@ -13,6 +13,10 @@ class Committee(models.Model):
     min_appointees = models.IntegerField(null=True, blank=True)
     max_appointees = models.IntegerField(null=True, blank=True)
     owner = models.ForeignKey(User)
+    charge = models.URLField(null=True, blank=True,
+        help_text='Link to committee charge')
+    notes = models.TextField(blank=True, help_text='Skills the committee is '
+        'looking for, special requirements, etc.')
 
     class Meta:
         verbose_name = "Committee"

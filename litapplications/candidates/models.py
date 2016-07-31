@@ -62,13 +62,15 @@ class Appointment(models.Model):
     APPLICANT = 'Applicant'
     POTENTIAL = 'Potential'
     RECOMMENDED = 'Recommended'
+    NOPE = 'Not recommended'
     ACCEPTED = 'Accepted'
     DECLINED = 'Declined'
 
     STATUS_CHOICES = (
-        (APPLICANT, APPLICANT),   # Candidate requested an appointment to this comm.
-        (POTENTIAL, POTENTIAL),   # Committee is considering candidate for comm.
+        (APPLICANT, APPLICANT),  # Candidate requested an appointment to this comm.
+        (POTENTIAL, POTENTIAL),  # Committee is considering candidate for comm.
         (RECOMMENDED, RECOMMENDED), # Committee advises VP to appoint this one.
+        (NOPE, NOPE),            # Committee advises VP not to appoint this one.
         (ACCEPTED, ACCEPTED),    # Candidate has accepted appointment.
         (DECLINED, DECLINED),    # Candidate has declined appointment.
     )
@@ -78,7 +80,7 @@ class Appointment(models.Model):
     # doing so would result in circular imports.
     committee = models.ForeignKey('committees.Committee',
         related_name='appointments')
-    status = models.CharField(max_length=12,
+    status = models.CharField(max_length=15,
         choices=STATUS_CHOICES,
         default=APPLICANT)
 
