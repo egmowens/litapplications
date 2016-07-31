@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Your committees</h2>
+  <div class="row">
+    {% for committee in your_committees %}
+      {% include "committees/committee_panel.html" %}
+    {% empty %}
+      <p>
+        You haven't claimed any committees yet. Talk to the Appointments
+        Committee chair.
+      </p>
+    {% endfor %}    
+  </div>
+
+  <h2>All committees</h2>
+
+  <div class="row">
+    {% for committee in object_list %}
+      {% include "committees/committee_panel.html" %}
+    {% empty %}
+      <p>
+        No committees yet.
+      </p>
+    {% endfor %}
+  </div>
+{% endblock content %}

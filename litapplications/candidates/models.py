@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
-from litapplications.committees.models import Committee
-
 
 class Candidate(models.Model):
     REVIEWED = 'Review complete'
@@ -31,6 +29,7 @@ class Candidate(models.Model):
     class Meta:
         verbose_name = "Candidate"
         verbose_name_plural = "Candidates"
+        ordering = ['-form_date', 'last_updated']
 
     def __str__(self):
         return '{self.first_name} {self.last_name}'.format(self=self)
@@ -60,22 +59,33 @@ class Candidate(models.Model):
 
 
 class Appointment(models.Model):
+    APPLICANT = 'Applicant'
+    POTENTIAL = 'Potential'
+    RECOMMENDED = 'Recommended'
+    ACCEPTED = 'Accepted'
+    DECLINED = 'Declined'
+
     STATUS_CHOICES = (
-        (0, 'APPLICANT'),   # Candidate requested an appointment to this comm.
-        (0, 'POTENTIAL'),   # Committee is considering candidate for comm.
-        (1, 'RECOMMENDED'), # Committee advises VP to appoint this one.
-        (2, 'ACCEPTED'),    # Candidate has accepted appointment.
-        (2, 'DECLINED'),    # Candidate has declined appointment.
+        (APPLICANT, APPLICANT),   # Candidate requested an appointment to this comm.
+        (POTENTIAL, POTENTIAL),   # Committee is considering candidate for comm.
+        (RECOMMENDED, RECOMMENDED), # Committee advises VP to appoint this one.
+        (ACCEPTED, ACCEPTED),    # Candidate has accepted appointment.
+        (DECLINED, DECLINED),    # Candidate has declined appointment.
     )
 
-    candidate = models.ForeignKey(Candidate)
-    committee = models.ForeignKey(Committee)
-    status = models.IntegerField(choices=STATUS_CHOICES)
+    candidate = models.ForeignKey(Candidate, related_name='appointments')
+    # We have to reference by name rather than by importing Committee, because
+    # doing so would result in circular imports.
+    committee = models.ForeignKey('committees.Committee',
+        related_name='appointments')
+    status = models.CharField(max_length=12,
+        choices=STATUS_CHOICES,
+        default=APPLICANT)
 
     class Meta:
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"
 
     def __str__(self):
-        pass
+        return '{self.candidate} for {self.committee}'.format(self=self)
     
