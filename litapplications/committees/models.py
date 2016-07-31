@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
 from litapplications.candidates.models import Appointment
@@ -24,6 +25,10 @@ class Committee(models.Model):
 
     def __str__(self):
         return self.long_name
+
+
+    def get_absolute_url(self):
+        return reverse_lazy('committees:detail', args=[self.pk])
 
 
     def is_fully_appointed(self):
