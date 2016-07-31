@@ -5,13 +5,8 @@ from django.db import models
 
 from litapplications.committees.models import Committee
 
-class Candidate(models.Model):
-    STATUS_CHOICES = (
-        (0, 'APPLICANT'),
-        (1, 'PROPOSED'),
-        (2, 'ACCEPTED'),
-    )
 
+class Candidate(models.Model):
     REVIEWED = 'Review complete'
     IN_PROCESS = 'Review in process'
     UNREVIEWED = 'Review not yet started'
@@ -19,7 +14,6 @@ class Candidate(models.Model):
     ala_id = models.CharField(max_length=15)
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30)
-    status = models.IntegerField(choices=STATUS_CHOICES)
     email = models.EmailField(blank=True)
     resume = models.TextField(blank=True)
     ala_appointments = models.TextField(blank=True) # Historical + current.
@@ -30,16 +24,6 @@ class Candidate(models.Model):
     notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
-
-    desired_comms = models.ManyToManyField(Committee,
-        help_text='Committee(s) requested by this candidate',
-        related_name='desired_comms',
-        blank=True)
-
-    potential_comms = models.ManyToManyField(Committee,
-        help_text='Committee(s) being considered by LITA Appointments',
-        related_name='potential_comms',
-        blank=True)
 
     review_complete = models.BooleanField(default=False,
         help_text='Have recommendations been finalized?')
@@ -69,7 +53,29 @@ class Candidate(models.Model):
     def review_status(self):
         if self.review_complete:
             return self.REVIEWED
-        elif self.potential_comms:
+        elif self.appointments.count():
             return self.IN_PROCESS
         else:
             return self.UNREVIEWED
+
+
+class Appointment(models.Model):
+    STATUS_CHOICES = (
+        (0, 'APPLICANT'),   # Candidate requested an appointment to this comm.
+        (0, 'POTENTIAL'),   # Committee is considering candidate for comm.
+        (1, 'RECOMMENDED'), # Committee advises VP to appoint this one.
+        (2, 'ACCEPTED'),    # Candidate has accepted appointment.
+        (2, 'DECLINED'),    # Candidate has declined appointment.
+    )
+
+    candidate = models.ForeignKey(Candidate)
+    committee = models.ForeignKey(Committee)
+    status = models.IntegerField(choices=STATUS_CHOICES)
+
+    class Meta:
+        verbose_name = "Appointment"
+        verbose_name_plural = "Appointments"
+
+    def __str__(self):
+        pass
+    
