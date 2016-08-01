@@ -81,8 +81,9 @@ def ingest_file(request, file_obj):
         committee_code = entity[COMMITTEE_KEY]
 
         try:
-            committee = Committee.objects.get(short_code=committee_code)
-        except Committee.DoesNotExist:
+            committee = Committee.objects.filter(
+                short_code__iexact=committee_code)[0] #case insensitive
+        except IndexError:
             logger.exception('Could not find committee')
             warnings.append('Could not find committee for {key}'.format(
                 key=entity[COMMITTEE_KEY]))
