@@ -1,0 +1,1 @@
+web: gunicorn litapplications.wsgi:application --log-file -
