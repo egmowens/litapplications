@@ -3,9 +3,19 @@
 {% block content %}
 <div class="row">
   <div class="col-xs-12 col-sm-4">
-    <h2>Unreviewed</h2>
-    
-    {% for candidate in unreviewed %}
+    <h2>Incomplete</h2>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-10">
+        <em>
+          These candidates have one or more appointments that haven't yet been
+          finalized (either 'recommended' or 'not recommended').
+        </em>
+        <hr />
+      </div>     
+    </div>
+
+    {% for candidate in incomplete %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
     {% empty %}
       <p>
@@ -18,17 +28,37 @@
   </div>
 
   <div class="col-xs-12 col-sm-4">
-    <h2>Review in progress</h2>
+    <h2>Pending {% if reviewed %}&#127881;{% endif %}</h2>
     
-    {% for candidate in in_process %}
+    <div class="row">
+      <div class="col-xs-12 col-sm-10">
+        <em>
+          The committee has recommended these candidates be appointed to one or
+          more committees &mdash; good job! Either the VP needs to send them an appointment letter, or we're waiting to hear back
+          on whether they'll accept the appointment.
+        </em>
+        <hr />
+      </div>     
+    </div>
+
+    {% for candidate in pending %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
     {% endfor %}
   </div>
 
   <div class="col-xs-12 col-sm-4">
-    <h2>Done! {% if reviewed %}&#127881;{% endif %}</h2>
+    <h2>Done! {% if done %}&#127881;{% endif %}</h2>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-10">
+        <em>
+          Aw yeah.
+        </em>
+        <hr />
+      </div>     
+    </div>
     
-    {% for candidate in reviewed %}
+    {% for candidate in done %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
     {% endfor %}
   </div>

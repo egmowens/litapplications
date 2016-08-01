@@ -5,6 +5,7 @@ from django.views.generic.list import ListView
 
 from litapplications.candidates.models import Candidate, Appointment
 
+from .forms import UpdateNotesForm, UpdateNumbersForm
 from .models import Committee
 
 class CommitteeListView(LoginRequiredMixin, ListView):
@@ -48,6 +49,9 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             appointments__status=Appointment.DECLINED,
             appointments__committee=obj)
 
+        context['candidates'] = Candidate.objects.filter(
+            appointments__committee=obj)
+
         # For constructing the dropdown in the batch editing form.
         # We exclude ACCEPTED and DECLINED because committee members can't
         # set those - they rely on the VP having sent a letter and the applicant
@@ -56,16 +60,25 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             in Appointment.STATUS_CHOICES
             if choice[0] not in [Appointment.ACCEPTED, Appointment.DECLINED]]
 
+        context['notes_form'] = UpdateNotesForm(instance=self.get_object())
+        context['numbers_form'] = UpdateNumbersForm(instance=self.get_object())
+
         return context
 
 
 
 class CommitteeUpdateNotesView(LoginRequiredMixin, UpdateView):
-    model = Candidate
+    model = Committee
     fields = ['notes']
 
-    def form_valid(self, form):
-        return super(CommitteeUpdateNotesView, self).form_valid(form)
+    def get_success_url(self):
+        return self.get_object().get_absolute_url()
+
+
+
+class CommitteeUpdateNumbersView(LoginRequiredMixin, UpdateView):
+    model = Committee
+    fields = ['min_appointees', 'max_appointees']
 
     def get_success_url(self):
         return self.get_object().get_absolute_url()

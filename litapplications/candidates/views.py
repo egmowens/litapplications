@@ -22,16 +22,23 @@ class CandidateListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CandidateListView, self).get_context_data(**kwargs)
-        context['unreviewed'] = Candidate.objects.filter(
-            potential_comms__isnull=True,
-            review_complete=False)
+        context['unfinished'] = Candidate.objects.filter(
+            appointments__status__in=[
+                Appointment.APPLICANT,
+                Appointment.POTENTIAL]
+            ).filter(review_complete=False)
 
-        context['in_process'] = Candidate.objects.filter(
-            potential_comms__isnull=False,
-            review_complete=False)
+        context['pending'] = Candidate.objects.filter(
+            appointments__status__in=[
+                Appointment.RECOMMENDED]
+            ).filter(review_complete=False)
 
-        context['reviewed'] = Candidate.objects.filter(
-            review_complete=True)
+        context['done'] = Candidate.objects.exclude(
+            appointments__status__in=[
+                Appointment.APPLICANT,
+                Appointment.POTENTIAL,
+                Appointment.RECOMMENDED]
+            )
 
         return context
 
@@ -51,12 +58,8 @@ class CandidateUpdateNotesView(LoginRequiredMixin, UpdateView):
     model = Candidate
     fields = ['notes']
 
-    def form_valid(self, form):
-        return super(CandidateUpdateNotesView, self).form_valid(form)
-
     def get_success_url(self):
         return self.get_object().get_absolute_url()
-
 
 
 
