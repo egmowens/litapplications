@@ -9,7 +9,7 @@ class Candidate(models.Model):
     IN_PROCESS = 'Review in process'
     UNREVIEWED = 'Review not yet started'
 
-    ala_id = models.CharField(max_length=15)
+    ala_id = models.CharField(max_length=15, unique=True)
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30)
     email = models.EmailField(blank=True)
