@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
@@ -26,6 +27,12 @@ class Committee(models.Model):
     def __str__(self):
         return self.long_name
 
+
+    def clean(self):
+        super(Committee, self).clean()
+        if self.max_appointees < self.min_appointees:
+            raise ValidationError('The maximum number of appointees cannot be '
+                'less than the minimum number of appointees.')
 
     def get_absolute_url(self):
         return reverse_lazy('committees:detail', args=[self.pk])
