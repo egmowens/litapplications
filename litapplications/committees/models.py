@@ -13,7 +13,7 @@ class Committee(models.Model):
     long_name = models.CharField(max_length=50, blank=True)
     min_appointees = models.IntegerField(null=True, blank=True)
     max_appointees = models.IntegerField(null=True, blank=True)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, null=True, blank=True)
     charge = models.URLField(null=True, blank=True,
         help_text='Link to committee charge')
     notes = models.TextField(blank=True, help_text='Skills the committee is '

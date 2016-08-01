@@ -16,11 +16,14 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+from .views import HomeView
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^candidates/', include('litapplications.candidates.urls',
         namespace='candidates')),
     url(r'^committees/', include('litapplications.committees.urls',
-        namespace='committees'))
+        namespace='committees')),
+    url(r'^$', HomeView.as_view(), name='home'),
 ]
