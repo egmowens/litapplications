@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% comment %}
+Name, link to charge, notes on requirements (entered by committee member),
+    appointees (interested, vetted/prospective and vetted/not recommended,
+    recommended; include some kind of diversity info plus notes)
+    
+{% endcomment %}
+
+{% block content %}
+  <h1>{{ object }} <span class="small">{{ object.short_code }}/<a href="{{ objects.charge }}">charge</a></span></h1>
+
+  <strong><em>For all committees</em></strong>, please consider:
+  <ul>
+    <li>
+      <strong>Diversity</strong>: have we ensured the members represent a range
+      of personal backgrounds, library types, etc.?
+    </li>
+    <li>
+      <strong>Skills</strong>: have we supplied appointees with skills the
+      committee needs to flourish?
+    </li>
+    <li>
+      <strong>Skills development</strong>: are we giving appointees a chance
+      to learn new skills that they value?
+    </li>
+    <li>
+      <strong>Initiative</strong>: have we appointed people who get things done?
+    </li>
+  </ul>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Notes
+    </div>
+    <div class="panel-body">
+      <form method="post" action="{% url 'committees:update_notes' object.pk %}">
+        {% csrf_token %}
+        {{ notes_form | crispy }}
+        <input type="submit" value="update notes" class="btn btn-default">
+      </form>
+    </div>
+  </div>
+
+  <h2>Appointees</h2>
+
+  <h3>Maybe/yes</h3>
+  <div class="row">
+    <div class="col-xs-12 col-sm-3">
+      <h4>Applicants</h4>
+      {% for candidate in applicants %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="col-xs-12 col-sm-3">
+      <h4>Under consideration</h4>
+      {% for candidate in potential %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="col-xs-12 col-sm-3">
+      <h4>Recommended</h4>
+      {% for candidate in recommended %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="col-xs-12 col-sm-3">
+      <h4>Appointment accepted!</h4>
+      {% for candidate in accepted %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <h3>No</h3>
+  <div class="row">
+    <div class="col-xs-12 col-sm-3">
+      <h4>Not recommended</h4>
+      {% for candidate in not_recommended %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="col-xs-12 col-sm-3">
+      <h4>Declined appointment</h4>
+      {% for candidate in declined %}
+        <a href="candidate.get_absolute_url">{{ candidate }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <h3>Glossary</h3>
+  <ul>
+    <li><strong>Applicants</strong> have submitted a volunteer form and
+    expressed interest in this committee.</li>
+    <li><strong>Under consideration</strong> means the committee is
+    evaluating this candidate for this committee but has not yet made a
+    decision.</li>
+    <li><strong>Recommended</strong> means the committee recommends that
+    the VP appoint this candidate to this committee.</li>
+    <li><strong>Accepted</strong> means the VP has sent an appointment
+    invitation and the candidate has accepted it. Hooray!</li>
+    <li><strong>Not recommended</strong> means the committee has evaluated this
+    candidate and does not recommend appointing them to this committee.</li>
+    <li><strong>Declined</strong> means candidate received an appointment
+    letter but declined to serve on the committee.</li>
+  </ul>
+
+  <p>
+    Our goal is to get candidates moved into a final status (accepted, not
+    recommended, or declined) until committees are fully staffed.
+  </p>
+{% endblock content %}

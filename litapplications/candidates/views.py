@@ -24,6 +24,8 @@ class CandidateListView(LoginRequiredMixin, ListView):
 
         return context
 
+
+
 class CandidateDetailView(LoginRequiredMixin, DetailView):
     model = Candidate
 
@@ -38,8 +40,7 @@ class CandidateUpdateNotesView(LoginRequiredMixin, UpdateView):
     fields = ['notes']
 
     def form_valid(self, form):
-        print form.cleaned_data
-        print self.object
         return super(CandidateUpdateNotesView, self).form_valid(form)
+
     def get_success_url(self):
         return self.get_object().get_absolute_url()
