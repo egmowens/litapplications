@@ -30,7 +30,7 @@ class DataIngestView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('home')
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.request.is_superuser:
+        if not self.request.user.is_superuser:
             messages.add_message(request, messages.INFO,
                 'Sorry; only superusers can access this page.')
             return HttpResponseRedirect(reverse_lazy('home'))
