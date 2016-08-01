@@ -6,3 +6,5 @@ db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
 ALLOWED_HOSTS = ['morning-eyrie-79104.herokuapp.com/']
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'

@@ -8,10 +8,12 @@
     {% for committee in your_committees %}
       {% include "committees/committee_panel.html" %}
     {% empty %}
-      <p>
-        You haven't claimed any committees yet. Talk to the Appointments
-        Committee chair.
-      </p>
+      <div class="col-xs-12">
+        <p>
+          You haven't claimed any committees yet. Talk to the Appointments
+          Committee chair.
+        </p>        
+      </div>
     {% endfor %}    
   </div>
 
@@ -20,9 +22,11 @@
     {% for committee in lonely_committees %}
       {% include "committees/committee_panel.html" %}
     {% empty %}
-      <p>
-        All committees have been claimed - hooray!
-      </p>
+      <div class="col-xs-12">
+        <p>
+          All committees have been claimed - hooray!
+        </p>        
+      </div>
     {% endfor %}    
   </div>
 
