@@ -9,26 +9,37 @@ Name, link to charge, notes on requirements (entered by committee member),
 {% endcomment %}
 
 {% block content %}
-  <h1>{{ object }} <span class="small">{{ object.short_code }}/<a href="{{ objects.charge }}">charge</a></span></h1>
+  <h1>{{ object }} <span class="small">{{ object.short_code }}</span></h1>
 
-  <strong><em>For all committees</em></strong>, please consider:
-  <ul>
+  <ul class="list-unstyled">
     <li>
-      <strong>Diversity</strong>: have we ensured the members represent a range
-      of personal backgrounds, library types, etc.?
+      <strong>Charge:</strong> <a href="{{ object.charge }}">{{ object.charge }}</a>
     </li>
     <li>
-      <strong>Skills</strong>: have we supplied appointees with skills the
-      committee needs to flourish?
-    </li>
-    <li>
-      <strong>Skills development</strong>: are we giving appointees a chance
-      to learn new skills that they value?
-    </li>
-    <li>
-      <strong>Initiative</strong>: have we appointed people who get things done?
+      <strong>Owner:</strong> <a href="{{ object.owner }}">{{ object.owner }}</a>  
     </li>
   </ul>
+
+  <p>
+    <strong><em>For all committees</em></strong>, please consider:
+    <ul>
+      <li>
+        <strong>Diversity</strong>: have we ensured the members represent a range
+        of personal backgrounds, library types, etc.?
+      </li>
+      <li>
+        <strong>Skills</strong>: have we supplied appointees with skills the
+        committee needs to flourish?
+      </li>
+      <li>
+        <strong>Skills development</strong>: are we giving appointees a chance
+        to learn new skills that they value?
+      </li>
+      <li>
+        <strong>Initiative</strong>: have we appointed people who get things done?
+      </li>
+    </ul>
+  </p>
 
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -44,64 +55,6 @@ Name, link to charge, notes on requirements (entered by committee member),
   </div>
 
   <h2>Appointees</h2>
-{% comment %}
-  
-
-  <form method="post" action="{% url 'applications:batch_edit' %}" id="batch_edit">
-    {% csrf_token %}
-    <div class="form-group">
-      <ul class="list-unstyled">
-        <li>
-          <input type="checkbox" id="select_all">
-          <strong>
-            {% trans "Select/deselect all" %}            
-          </strong>
-        </li>
-        {% for app in object_list %}
-          <li>
-            <input type="checkbox" name="applications" value="{{ app.pk }}">
-            <span class="label label{{ app.get_bootstrap_class }}">
-              {{ app.get_status_display }}
-            </span>&nbsp;
-            <a href="{{ app.get_absolute_url }}">
-              {{ app }}
-            </a>
-            &mdash;
-            {% if app.get_version_count > 1 %} {# first version is original submission, not later review #}
-              {% blocktrans trimmed with reviewer=app.get_latest_reviewer review_date=app.get_latest_review_date|localize %}
-                Last reviewed by {{ reviewer }} on {{ review_date }}
-              {% endblocktrans %}
-            {% else %}
-              {% trans 'Not yet reviewed.' %}
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div class="row">
-      <div class="col-xs-12 col-sm-6">
-        <div class="form-group">    
-          <label for="select_status">
-            {% trans "Status for all selected applications" %}
-          </label>
-          
-          <select name="batch_status" class="form-control" id="select_status">
-            {% for status in status_choices %}
-              <option value="{{ status.0 }}">{{ status.1 }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">    
-      <input type="submit" class="btn btn-default" value="{% trans "Set status" %}" />
-    </div>
-  </form>
-{% endcomment %}
-
-
 
   <h3>Maybe/yes</h3>
   <form method="post" action="{% url 'candidates:update_status' object.pk %}" id="batch_edit">
