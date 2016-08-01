@@ -1,4 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
@@ -71,6 +73,21 @@ class CommitteeUpdateNotesView(LoginRequiredMixin, UpdateView):
     model = Committee
     fields = ['notes']
 
+    def form_invalid(self, form):
+        response = super(CommitteeUpdateNotesView, self).form_invalid(form)
+        for error in form.errors.values():
+            messages.add_message(self.request, messages.WARNING,
+                error.as_data()[0][0]) # just the message, no formatting
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS,
+            'Update successful. Thank you for working on appointments today!')
+        return super(CommitteeUpdateNotesView, self).form_valid(form)
+
+
     def get_success_url(self):
         return self.get_object().get_absolute_url()
 
@@ -79,6 +96,22 @@ class CommitteeUpdateNotesView(LoginRequiredMixin, UpdateView):
 class CommitteeUpdateNumbersView(LoginRequiredMixin, UpdateView):
     model = Committee
     fields = ['min_appointees', 'max_appointees']
+
+    def form_invalid(self, form):
+        super(CommitteeUpdateNumbersView, self).form_invalid(form)
+
+        for error in form.errors.values():
+            messages.add_message(self.request, messages.WARNING,
+                error.as_data()[0][0]) # just the message, no formatting
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS,
+            'Update successful. Thank you for working on appointments today!')
+        return super(CommitteeUpdateNumbersView, self).form_valid(form)
+
 
     def get_success_url(self):
         return self.get_object().get_absolute_url()

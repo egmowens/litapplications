@@ -20,6 +20,39 @@ Name, link to charge, notes on requirements (entered by committee member),
     </li>
   </ul>
 
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Notes
+        </div>
+        <div class="panel-body">
+          <form method="post" action="{% url 'committees:update_notes' object.pk %}">
+            {% csrf_token %}
+            {{ notes_form | crispy }}
+            <input type="submit" value="update notes" class="btn btn-default">
+          </form>
+        </div>
+      </div>      
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Number of appointees needed
+        </div>
+        <div class="panel-body">
+          <form method="post" action="{% url 'committees:update_numbers' object.pk %}">
+            {% csrf_token %}
+            {{ numbers_form | crispy }}
+            <input type="submit" value="update numbers" class="btn btn-default">
+          </form>
+        </div>
+      </div>      
+    </div>    
+  </div>
+
+  <h2>Possible Appointees</h2>
+
   <p>
     <strong><em>For all committees</em></strong>, please consider:
     <ul>
@@ -41,33 +74,6 @@ Name, link to charge, notes on requirements (entered by committee member),
     </ul>
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Notes
-    </div>
-    <div class="panel-body">
-      <form method="post" action="{% url 'committees:update_notes' object.pk %}">
-        {% csrf_token %}
-        {{ notes_form | crispy }}
-        <input type="submit" value="update notes" class="btn btn-default">
-      </form>
-    </div>
-  </div>
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Number of appointees needed
-    </div>
-    <div class="panel-body">
-      <form method="post" action="{% url 'committees:update_numbers' object.pk %}">
-        {% csrf_token %}
-        {{ numbers_form | crispy }}
-        <input type="submit" value="update numbers" class="btn btn-default">
-      </form>
-    </div>
-  </div>
-
-  <h2>Possible Appointees</h2>
 
   {% if candidates %}
     <form method="post" action="{% url 'candidates:update_status' object.pk %}" id="batch_edit">
@@ -171,7 +177,7 @@ Name, link to charge, notes on requirements (entered by committee member),
   </p>
   {% else %}
     <p>
-      None yet.
+      No applicants yet.
     </p>
   {% endif %}
 {% endblock content %}
