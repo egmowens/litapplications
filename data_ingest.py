@@ -3,6 +3,12 @@
 
 import argparse
 from bs4 import BeautifulSoup
+import logging
+
+from litapplications.candidates.models import Candidate, Appointment
+from litapplications.committees.models import Committee
+
+logger = logging.getLogger(__name__)
 
 # This is the data we expect to see in the Vlntr Export files.
 ALA_ID_KEY = 'ID'
@@ -31,21 +37,72 @@ PROPOSED = 'PROPOSED'
 COMMITTEE = 'COMMITTEE'
 STATUSES = [APPLICANT, PROPOSED, COMMITTEE]
 
+def update_fields(candidate, entity):
+    candidate.first_name = entity[FIRST_NAME_KEY]
+    candidate.last_name = entity[LAST_NAME_KEY]
+    candidate.email = entity[EMAIL]
+    candidate.resume = entity[EXPERTISE_KEY]
+    candidate.ala_appointments = entity[APPOINTMENTS_KEY]
+    candidate.other_info = entity[OTHER_INFO_KEY]
+    candidate.memberships = entity[MEMBERSHIPS_KEY]
+    candidate.state = entity[STATE_KEY]
+    candidate.country = entity[COUNTRY_KEY]
+    candidate.form_date = entity[STATUS_DATE_KEY]
+
+
+def create_candidate(entity):
+    candidate = Candidate()
+    candidate.ala_id = entity[ALA_ID_KEY]
+    update_fields(candidate, entity)
+    candidate.save()
+
+    return candidate
+
+
 def process_entity(entity):
+    warnings = []
+
     ala_id = entity[ALA_ID_KEY]
 
-    for key in DATA_KEYS:
-        print entity[key]
-
-    print '\n\n'
-
     # If ALA ID is new, create a Candidate accordingly
+    if not Candidate.objects.filter(ala_id=ala_id).count():
+        candidate = create_candidate(entity)
+    else:
+        candidate = Candidate.objects.get(ala_id=ala_id)
+        update_fields(candidate, entity)
+        candidate.save()
 
-    # If ALA ID is not new...
-        # Check name. If it's different, flag for human review.
-        # Otherwise, update the Candidate
-            # if the status doesn't match internal status, flag for human review
-            # note that there's no way to tell they've stopped being interested...
+    if not ((candidate.first_name == entity[FIRST_NAME_KEY]) and
+            (candidate.last_name == entity[LAST_NAME_KEY])):
+        warnings.append('Candidate has changed names - verify info is correct')
+
+    # Find the referenced committee (and don't do anything if we can't)
+    committee_code = entity[COMMITTEE_KEY]
+
+    try:
+        committee = Committee.objects.get(short_code=committee_code)
+    except Committee.DoesNotExist:
+        logger.exception()
+        warnings.append('Could not find committee for {key}'.format(
+            key=entity[COMMITTEE_KEY]))
+        return
+
+    try:
+        appointment = Appointment.objects.get(
+            committee=committee, candidate=candidate)
+    except Appointment.DoesNotExist:
+        appointment = Appointment()
+        appointment.candidate = candidate
+        appointment.committee = committee
+
+    # Status defaults to APPLICANT, so it needn't be specified in that case.
+    if entity[STATUS_KEY] == PROPOSED:
+        appointment.status = Appointment.RECOMMENDED
+    elif entity[STATUS_KEY] == COMMITTEE:
+        appointment.status = Appointment.ACCEPTED
+
+    appointment.save()
+
 
 def parse_file(filename):
     with open(filename) as html:
