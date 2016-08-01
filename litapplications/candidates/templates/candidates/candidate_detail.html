@@ -4,52 +4,122 @@
 
 {% block content %}
   <h2>{{ object }}</h2>
+
+  <h3>Committees</h3>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Under consideration for...</h3>
+        </div>
+        <div class="panel-body">
+          <ul class="list-unstyled">
+            {% for committee in committees %}
+              <li>
+                <a href="{{ committee.get_absolute_url }}">
+                  {{ committee }}
+                </a>                
+              </li>
+            {% endfor %}
+          </ul>
+          {% if committees %}
+            <p><em>
+              Set status on the committee page.
+            </em></p>
+          {% endif %}
+        </div>
+      </div>      
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Add committees to consider</h3>
+        </div>
+        <div class="panel-body">
+          {% if other_committees %}
+            <form method="post" action="{% url 'candidates:update_appointments' object.pk %}" id="batch_edit">
+              {% csrf_token %}
+
+              <div class="form-group">
+                <ul class="list-unstyled">
+                  {% for committee in other_committees %}
+                    <li>
+                      <input type="checkbox" name="committees" value="{{ committee.pk }}">
+                      <a href="{{ committee.get_absolute_url }}">
+                        {{ committee }}
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              
+              <input type="submit" value="add to candidate" class="btn btn-default">
+            </form>
+          {% else %}
+            None available.
+          {% endif %}
+        </div>
+      </div>      
+    </div>
+  </div>
+
+
+  <h3>Volunteer Information</h3>
   <p>
-    From: {{ object.place_of_origin }}
+    Lives in: {{ object.place_of_origin }}
   </p>
   <p>
     Volunteer form last submitted on: {{ object.form_date }}
   </p>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Education &amp; experience
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Education &amp; experience</h3>
+        </div>
+        <div class="panel-body">
+          {{ object.resume }}
+        </div>
+      </div>      
     </div>
-    <div class="panel-body">
-      {{ object.resume }}
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">ALA service history</h3>
+        </div>
+        <div class="panel-body">
+          {{ object.ala_appointments }}
+        </div>
+      </div>      
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Other info</h3>
+        </div>
+        <div class="panel-body">
+          {{ object.other_info }}
+        </div>
+      </div>      
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Division/RT memberships</h3>
+        </div>
+        <div class="panel-body">
+          {{ object.memberships }}
+        </div>
+      </div>      
     </div>
   </div>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">ALA service history
-    </div>
-    <div class="panel-body">
-      {{ object.ala_appointments }}
-    </div>
-  </div>
 
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">Other info
-    </div>
-    <div class="panel-body">
-      {{ object.other_info }}
-    </div>
-  </div>
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Division/RT memberships
-    </div>
-    <div class="panel-body">
-      {{ object.memberships }}
-    </div>
-  </div>
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Notes
+      <h3 class="panel-title">Notes</h3>
     </div>
     <div class="panel-body">
       <form method="post" action="{% url 'candidates:update_notes' object.pk %}">

@@ -83,6 +83,11 @@ class Appointment(models.Model):
     status = models.CharField(max_length=15,
         choices=STATUS_CHOICES,
         default=APPLICANT)
+    locally_proposed = models.BooleanField(default=False,
+        help_text='Set to True if the appointment was suggested by an '
+        'Appointments Committee member - in this case you may have to ask the '
+        'candidate to fill out a committee volunteer form, and also you should '
+        'be careful of overwriting this.')
 
     class Meta:
         verbose_name = "Appointment"

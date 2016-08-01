@@ -26,19 +26,19 @@ class CandidateListView(LoginRequiredMixin, ListView):
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL]
-            ).filter(review_complete=False)
+            )
 
         context['pending'] = Candidate.objects.filter(
             appointments__status__in=[
                 Appointment.RECOMMENDED]
-            ).filter(review_complete=False)
+            )
 
         context['done'] = Candidate.objects.exclude(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
                 Appointment.RECOMMENDED]
-            )
+            ).exclude(appointments=None)
 
         return context
 
@@ -50,11 +50,22 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(CandidateDetailView, self).get_context_data(**kwargs)
         context['notes_form'] = UpdateNotesForm(instance=self.get_object())
+
+        obj = self.get_object()
+        context['committees'] = Committee.objects.filter(
+            appointments__candidate=obj,
+            appointments__status__in=[
+                Appointment.APPLICANT,
+                Appointment.POTENTIAL,
+                Appointment.RECOMMENDED
+            ])
+        context['other_committees'] = Committee.objects.exclude(
+            appointments__candidate=obj)
         return context
 
 
 
-class CandidateUpdateNotesView(LoginRequiredMixin, UpdateView):
+class UpdateNotesView(LoginRequiredMixin, UpdateView):
     model = Candidate
     fields = ['notes']
 
@@ -76,6 +87,15 @@ class UpdateStatusView(LoginRequiredMixin, View):
 
         try:
             assert 'candidates' in request.POST
+        except AssertionError:
+            messages.add_message(request, messages.WARNING,
+                'Please select one or more candidates in order to set their '
+                'status.')
+
+            return HttpResponseRedirect(reverse_lazy(
+                'committees:detail', args=[committee.pk]))
+
+        try:
             assert 'batch_status' in request.POST
 
             status = request.POST['batch_status']
@@ -90,8 +110,7 @@ class UpdateStatusView(LoginRequiredMixin, View):
             logger.exception('Did not find valid data for batch editing')
             return HttpResponseBadRequest()
 
-
-        for candidate_pk in request.POST['candidates']:
+        for candidate_pk in request.POST.getlist('candidates'):
             try:
                 candidate = Candidate.objects.get(pk=candidate_pk)
             except Candidate.DoesNotExist:
@@ -117,3 +136,46 @@ class UpdateStatusView(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse_lazy(
             'committees:detail', args=[committee.pk]))
+
+
+
+class UpdateAppointmentsView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        try:
+            candidate = Candidate.objects.get(pk=self.kwargs['pk'])
+        except Candidate.DoesNotExist:
+            # ValueError will be raised if the status cannot be cast to int.
+            logger.exception('Tried to update appointments for nonexistent candidate')
+            return HttpResponseBadRequest()
+
+        try:
+            assert 'committees' in request.POST
+        except AssertionError:
+            messages.add_message(request, messages.WARNING,
+                'Please select one or more committees.')
+
+            return HttpResponseRedirect(reverse_lazy(
+                'candidates:detail', args=[candidate.pk]))
+
+        for committee_pk in request.POST.getlist('committees'):
+            try:
+                committee = Committee.objects.get(pk=committee_pk)
+            except Committee.DoesNotExist:
+                logger.exception('Could not find committee with posted pk {pk};'
+                    ' continuing through remaining pks'.format(pk=committee_pk))
+                continue
+
+            appointment = Appointment()
+            appointment.candidate = candidate
+            appointment.committee = committee
+            appointment.status = Appointment.APPLICANT
+            appointment.locally_proposed = True
+            appointment.save()
+
+        messages.add_message(request, messages.SUCCESS,
+            'Update successful. Thank you for working on appointments today!')
+
+        return HttpResponseRedirect(reverse_lazy(
+            'candidates:detail', args=[candidate.pk]))
