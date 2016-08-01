@@ -47,6 +47,15 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
         context['declined'] = Candidate.objects.filter(
             appointments__status=Appointment.DECLINED,
             appointments__committee=obj)
+
+        # For constructing the dropdown in the batch editing form.
+        # We exclude ACCEPTED and DECLINED because committee members can't
+        # set those - they rely on the VP having sent a letter and the applicant
+        # having responded.
+        context['status_choices'] = [choice for choice
+            in Appointment.STATUS_CHOICES
+            if choice[0] not in [Appointment.ACCEPTED, Appointment.DECLINED]]
+
         return context
 
 

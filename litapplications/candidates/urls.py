@@ -7,4 +7,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/', views.CandidateDetailView.as_view(), name='detail'),
     url(r'^update/(?P<pk>\d+)/notes/', views.CandidateUpdateNotesView.as_view(),
         name='update_notes'),
+    url(r'^update/(?P<pk>\d+)/status/', views.UpdateStatusView.as_view(),
+        name='update_status'),
 ]
