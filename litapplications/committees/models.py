@@ -39,17 +39,19 @@ class Committee(models.Model):
 
 
     def is_fully_appointed(self):
-        if self.appointments.filter(status__in=[
+        if (self.appointments.filter(status__in=[
                 Appointment.RECOMMENDED, Appointment.ACCEPTED]
-            ).count() >= self.min_appointees:
+            ).count() >= self.min_appointees and 
+            self.min_appointees is not None):
 
             return True
         else:
             return False
 
     def is_fully_staffed(self):
-        if self.appointments.filter(
-            status__in=[Appointment.ACCEPTED]).count() >= self.min_appointees:
+        if (self.appointments.filter(
+            status__in=[Appointment.ACCEPTED]).count() >= self.min_appointees
+            and self.min_appointees is not None):
 
             return True
         else:
