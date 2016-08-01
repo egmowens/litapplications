@@ -29,30 +29,30 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
         obj = self.get_object()
         context['applicants'] = Candidate.objects.filter(
             appointments__status=Appointment.APPLICANT,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['potential'] = Candidate.objects.filter(
             appointments__status=Appointment.POTENTIAL,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['recommended'] = Candidate.objects.filter(
             appointments__status=Appointment.RECOMMENDED,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['accepted'] = Candidate.objects.filter(
             appointments__status=Appointment.ACCEPTED,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['not_recommended'] = Candidate.objects.filter(
             appointments__status=Appointment.NOPE,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['declined'] = Candidate.objects.filter(
             appointments__status=Appointment.DECLINED,
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         context['candidates'] = Candidate.objects.filter(
-            appointments__committee=obj)
+            appointments__committee=obj).distinct()
 
         # For constructing the dropdown in the batch editing form.
         # We exclude ACCEPTED and DECLINED because committee members can't

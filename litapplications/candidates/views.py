@@ -26,19 +26,19 @@ class CandidateListView(LoginRequiredMixin, ListView):
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL]
-            )
+            ).distinct()
 
         context['pending'] = Candidate.objects.filter(
             appointments__status__in=[
                 Appointment.RECOMMENDED]
-            )
+            ).distinct()
 
         context['done'] = Candidate.objects.exclude(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
                 Appointment.RECOMMENDED]
-            ).exclude(appointments=None)
+            ).exclude(appointments=None).distinct()
 
         return context
 
@@ -58,9 +58,9 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
                 Appointment.RECOMMENDED
-            ])
+            ]).distinct()
         context['other_committees'] = Committee.objects.exclude(
-            appointments__candidate=obj)
+            appointments__candidate=obj).distinct()
         return context
 
 
