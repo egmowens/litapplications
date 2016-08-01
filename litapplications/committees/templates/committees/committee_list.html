@@ -6,10 +6,12 @@
     {% for committee in your_committees %}
       {% include "committees/committee_panel.html" %}
     {% empty %}
-      <p>
-        You haven't claimed any committees yet. Talk to the Appointments
-        Committee chair.
-      </p>
+      <div class="col-xs-12">
+        <p>
+          You haven't claimed any committees yet. Talk to the Appointments
+          Committee chair.
+        </p>        
+      </div>
     {% endfor %}    
   </div>
 
@@ -19,9 +21,11 @@
     {% for committee in object_list %}
       {% include "committees/committee_panel.html" %}
     {% empty %}
-      <p>
-        No committees yet.
-      </p>
+      <div class="col-xs-12">
+        <p>
+          No committees yet.
+        </p>
+      </div>
     {% endfor %}
   </div>
 {% endblock content %}
