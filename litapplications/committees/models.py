@@ -10,7 +10,7 @@ from litapplications.candidates.models import Appointment
 
 class Committee(models.Model):
 
-    short_code = models.CharField(max_length=15, blank=True)
+    short_code = models.CharField(max_length=15, blank=True, unique=True)
     long_name = models.CharField(max_length=50, blank=True)
     min_appointees = models.IntegerField(null=True, blank=True)
     max_appointees = models.IntegerField(null=True, blank=True)
