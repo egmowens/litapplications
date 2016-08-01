@@ -92,6 +92,7 @@ class Appointment(models.Model):
     class Meta:
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"
+        unique_together = (("candidate", "committee"),)
 
     def __str__(self):
         return '{self.candidate} for {self.committee}'.format(self=self)
