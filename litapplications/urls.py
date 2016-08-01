@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from .views import HomeView
+from .views import HomeView, DataIngestView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^committees/', include('litapplications.committees.urls',
         namespace='committees')),
     url(r'^$', HomeView.as_view(), name='home'),
+    url(r'^ingest/$', DataIngestView.as_view(), name='data_ingest'),
 ]
