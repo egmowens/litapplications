@@ -1,7 +1,26 @@
 from __future__ import unicode_literals
+from datetime import date, timedelta
 
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
+
+class RecentVolunteersManager(models.Manager):
+    """
+    This class will act as the default manager for the Candidate model.
+
+    It filters out candidates who do not have a recent volunteer application
+    on file, unless we have been actively considering them. The ALA database
+    does not clear out old applications, but we don't actually want to be
+    considering candidates who have not volunteered recently.
+    """
+    def get_queryset(self):
+        one_year_ago = date.today() - timedelta(days=365)
+        return super(RecentVolunteersManager, self).get_queryset().filter(
+                form_date__gte=one_year_ago
+            ).exclude(appointments__status__in=[
+                    Appointment.POTENTIAL, Appointment.RECOMMENDED
+            ])
+
 
 
 class Candidate(models.Model):
@@ -29,7 +48,11 @@ class Candidate(models.Model):
     class Meta:
         verbose_name = "Candidate"
         verbose_name_plural = "Candidates"
-        ordering = ['-form_date', 'last_updated']
+        ordering = ['first_name', 'last_name']
+
+    #
+    # Methods
+    # ---------------------------------------------------------------------------
 
     def __str__(self):
         return '{self.first_name} {self.last_name}'.format(self=self)
@@ -56,6 +79,14 @@ class Candidate(models.Model):
             return self.IN_PROCESS
         else:
             return self.UNREVIEWED
+
+    #
+    # Managers
+    # ---------------------------------------------------------------------------
+
+    even_obsolete = models.Manager()
+    objects = RecentVolunteersManager()
+
 
 
 class Appointment(models.Model):
