@@ -36,7 +36,8 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             appointments__committee=obj).distinct()
 
         context['recommended'] = Candidate.objects.filter(
-            appointments__status=Appointment.RECOMMENDED,
+            appointments__status__in=[Appointment.RECOMMENDED,
+                                      Appointment.SENT],
             appointments__committee=obj).distinct()
 
         context['accepted'] = Candidate.objects.filter(
@@ -55,12 +56,13 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             appointments__committee=obj).distinct()
 
         # For constructing the dropdown in the batch editing form.
-        # We exclude ACCEPTED and DECLINED because committee members can't
-        # set those - they rely on the VP having sent a letter and the applicant
-        # having responded.
+        # We exclude ACCEPTED, DECLINED, and SENT because committee members
+        # can't set those - they rely on choices made by the VP and candidates.
         context['status_choices'] = [choice for choice
             in Appointment.STATUS_CHOICES
-            if choice[0] not in [Appointment.ACCEPTED, Appointment.DECLINED]]
+            if choice[0] not in [Appointment.ACCEPTED,
+                                 Appointment.DECLINED,
+                                 Appointment.SENT]]
 
         context['notes_form'] = UpdateNotesForm(instance=self.get_object())
         context['numbers_form'] = UpdateNumbersForm(instance=self.get_object())

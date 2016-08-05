@@ -102,9 +102,7 @@ class UpdateStatusView(LoginRequiredMixin, View):
             assert status in [Appointment.APPLICANT,
                               Appointment.POTENTIAL,
                               Appointment.RECOMMENDED,
-                              Appointment.NOPE,
-                              Appointment.ACCEPTED,
-                              Appointment.DECLINED]
+                              Appointment.NOPE]
         except (AssertionError, ValueError):
             # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Did not find valid data for batch editing')
@@ -146,7 +144,6 @@ class UpdateAppointmentsView(LoginRequiredMixin, View):
         try:
             candidate = Candidate.objects.get(pk=self.kwargs['pk'])
         except Candidate.DoesNotExist:
-            # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Tried to update appointments for nonexistent candidate')
             return HttpResponseBadRequest()
 

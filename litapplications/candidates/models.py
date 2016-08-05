@@ -96,6 +96,7 @@ class Appointment(models.Model):
     NOPE = 'Not recommended'
     ACCEPTED = 'Accepted'
     DECLINED = 'Declined'
+    SENT = 'Sent'
 
     STATUS_CHOICES = (
         (APPLICANT, APPLICANT),  # Candidate requested an appointment to this comm.
@@ -104,6 +105,7 @@ class Appointment(models.Model):
         (NOPE, NOPE),            # Committee advises VP not to appoint this one.
         (ACCEPTED, ACCEPTED),    # Candidate has accepted appointment.
         (DECLINED, DECLINED),    # Candidate has declined appointment.
+        (SENT, SENT)             # Chair has sent appointment letter.
     )
 
     candidate = models.ForeignKey(Candidate, related_name='appointments')
