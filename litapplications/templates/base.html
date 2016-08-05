@@ -193,7 +193,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="{% url 'candidates:list' %}">Candidates</a></li>
             <li><a href="{% url 'committees:list' %}">Committees</a></li>
-            {% if perms.can_appoint %}
+            {% if perms.candidates.can_appoint %}
               <li><a href="{% url 'candidates:appointments' %}">Appointments</a></li>
             {% endif %}
           </ul>
@@ -206,7 +206,7 @@
           </ul>
         </div><!--/.nav-collapse -->
       </div><!--/.container-fluid -->
-    </nav>
+    </nav>  
 
     <div class="header">
       <div class="container-fluid">

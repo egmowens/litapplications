@@ -2,6 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.models import Group, Permission
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.views.generic.base import View, TemplateView
@@ -15,6 +16,14 @@ from .forms import UpdateNotesForm
 from .models import Candidate, Appointment
 
 logger = logging.getLogger(__name__)
+
+
+# This code has to live somewhere. Can't live in models.py, because the
+# app registry isn't ready yet. Groups: the worst.
+chairs = Group.objects.get(name='Chairs') # created during migration
+can_appoint = Permission.objects.get(name='Can appoint committee members')
+
+chairs.permissions.add(can_appoint)
 
 
 class CandidateListView(LoginRequiredMixin, ListView):

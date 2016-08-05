@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
+
 class RecentVolunteersManager(models.Manager):
     """
     This class will act as the default manager for the Candidate model.
@@ -126,6 +127,9 @@ class Appointment(models.Model):
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"
         unique_together = (("candidate", "committee"),)
+        permissions = (
+            ('can_appoint', 'Can appoint committee members'),
+        )
 
     def __str__(self):
         return '{self.candidate} for {self.committee}'.format(self=self)
