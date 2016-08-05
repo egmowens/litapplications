@@ -3,6 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.views.generic.base import View, TemplateView
@@ -20,8 +21,11 @@ logger = logging.getLogger(__name__)
 
 # This code has to live somewhere. Can't live in models.py, because the
 # app registry isn't ready yet. Groups: the worst.
-chairs = Group.objects.get_or_create(name='Chairs')
-can_appoint = Permission.objects.get_or_create(name='Can appoint committee members')
+chairs, created = Group.objects.get_or_create(name='Chairs')
+appt = ContentType.objects.get(app_label='candidates', model='appointment')
+can_appoint, created = Permission.objects.create(codename='can_appoint',
+    name='Can appoint committee members',
+    content_type=appt)
 
 chairs.permissions.add(can_appoint)
 
