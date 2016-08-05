@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # This code has to live somewhere. Can't live in models.py, because the
 # app registry isn't ready yet. Groups: the worst.
-chairs = Group.objects.get(name='Chairs') # created during migration
+chairs = Group.objects.get_or_create(name='Chairs')
 can_appoint = Permission.objects.get(name='Can appoint committee members')
 
 chairs.permissions.add(can_appoint)
