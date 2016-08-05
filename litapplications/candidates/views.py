@@ -199,7 +199,9 @@ class AppointmentsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView
         context['declined'] = Appointment.objects.filter(
             status=Appointment.DECLINED).order_by('committee')
 
-        context['status_choices'] = [Appointment.ACCEPTED,
+        context['status_choices'] = ['----',
+                                     Appointment.SENT,
+                                     Appointment.ACCEPTED,
                                      Appointment.DECLINED]
         return context
 
@@ -219,10 +221,16 @@ class AppointmentsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView
                     continue
 
                 try:
-                    assert value in [Appointment.DECLINED, Appointment.ACCEPTED]#, Appointment.SENT]
+                    assert value in ['----',
+                                     Appointment.SENT,
+                                     Appointment.DECLINED,
+                                     Appointment.ACCEPTED]
                 except AssertionError:
                     logger.exception('Received bad status {status}'.format(
                         status=value))
+
+                if value == '----':
+                    continue
 
                 appointment.status = value
                 appointment.save()
