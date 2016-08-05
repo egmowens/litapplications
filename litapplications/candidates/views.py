@@ -2,8 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.views.generic.base import View, TemplateView
