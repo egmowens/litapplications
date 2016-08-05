@@ -127,9 +127,6 @@ class Appointment(models.Model):
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"
         unique_together = (("candidate", "committee"),)
-        permissions = (
-            ('can_appoint', 'Can appoint committee members'),
-        )
 
     def __str__(self):
         return '{self.candidate} for {self.committee}'.format(self=self)

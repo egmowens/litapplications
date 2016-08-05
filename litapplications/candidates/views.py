@@ -20,14 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 # This code has to live somewhere. Can't live in models.py, because the
-# app registry isn't ready yet. Groups: the worst.
+# app registry isn't ready yet. Groups: the worst. And the permission-setting
+# needs to happen in the admin for now, because everything is awful.
 chairs, created = Group.objects.get_or_create(name='Chairs')
-appt = ContentType.objects.get(app_label='candidates', model='appointment')
-can_appoint, created = Permission.objects.create(codename='can_appoint',
-    name='Can appoint committee members',
-    content_type=appt)
-
-chairs.permissions.add(can_appoint)
 
 
 class CandidateListView(LoginRequiredMixin, ListView):
