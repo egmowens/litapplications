@@ -193,6 +193,9 @@
             <li><a href="/">Home</a></li>
             <li><a href="{% url 'candidates:list' %}">Candidates</a></li>
             <li><a href="{% url 'committees:list' %}">Committees</a></li>
+            {% if perms.can_appoint %}
+              <li><a href="{% url 'candidates:appointments' %}">Appointments</a></li>
+            {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}

@@ -1,10 +1,10 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.views.generic.base import View
+from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
@@ -179,3 +179,50 @@ class UpdateAppointmentsView(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse_lazy(
             'candidates:detail', args=[candidate.pk]))
+
+
+
+class AppointmentsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+    permission_required = 'candidates.can_appoint'
+    template_name = 'candidates/appointments.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AppointmentsView, self).get_context_data(**kwargs)
+        context['recommended'] = Appointment.objects.filter(
+            status=Appointment.RECOMMENDED).order_by('committee')
+        context['accepted'] = Appointment.objects.filter(
+            status=Appointment.ACCEPTED).order_by('committee')
+        context['declined'] = Appointment.objects.filter(
+            status=Appointment.DECLINED).order_by('committee')
+
+        context['status_choices'] = [Appointment.ACCEPTED,
+                                     Appointment.DECLINED]
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        print request.POST
+
+        for key, value in request.POST.items():
+            if key.startswith('appointment'):
+                pk = key[12:]
+
+                try:
+                    appointment = Appointment.objects.get(pk=pk)
+                except Appointment.DoesNotExist:
+                    logger.exception('Could not find appointment #{pk}'.format(
+                        pk=pk))
+                    continue
+
+                try:
+                    assert value in [Appointment.DECLINED, Appointment.ACCEPTED]#, Appointment.SENT]
+                except AssertionError:
+                    logger.exception('Received bad status {status}'.format(
+                        status=value))
+
+                appointment.status = value
+                appointment.save()
+
+        messages.add_message(request, messages.INFO, 'Updated! Thank you for '
+            'working on appointments today.')
+        return HttpResponseRedirect(reverse_lazy('candidates:appointments'))

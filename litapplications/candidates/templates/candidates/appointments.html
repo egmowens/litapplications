@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Manage Appointments</h1>
+<p>
+  This page is visible only to committee chairs, and allows you to see all your
+  committee's recommended appointments in one place, and also to track
+  status and synchronize it with the database.
+</p>
+
+<p>
+  If you import new data from the ALA volunteer database that reflects a
+  status of "accepted", that status will be automatically updated here.
+</p>
+<h2>Recommended Appointments</h2>
+  {% if recommended %}    
+    <form method="post" id="batch_edit" class="form-inline">
+      {% csrf_token %}
+      {% for appointment in recommended %}
+        <div class="row">
+          <div class="col-xs-12 col-sm-3">
+            <a href="{{ appointment.candidate.get_absolute_url }}">
+              {{ appointment.candidate }}
+            </a>
+            for 
+            <a href="{{ appointment.committee.get_absolute_url }}">
+              {{ appointment.committee }}
+            </a>
+          </div>
+          <div class="col-xs-12 col-sm-2">
+            <select class="form-control pull-left" name="appointment_{{ appointment.pk }}" id="appointment_{{ appointment.pk }}">
+              {% for choice in status_choices %}
+                <option value="{{ choice }}">{{ choice }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <hr />
+      {% endfor %}
+      <div class="row">
+        <div class="col-xs-12 col-sm-offset-3">
+          <input type="submit" value="update all" class="btn btn-primary pull-left">
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <p>
+      None right now.
+    </p>
+  {% endif %}
+
+<h2>Appointments Accepted</h2>
+
+{% if accepted %}
+  <ul class="list-unstyled">
+    {% for appointment in accepted %}
+      <li>
+        <a href="{{ appointment.candidate.get_absolute_url }}">
+          {{ appointment.candidate }}
+        </a>
+        for 
+        <a href="{{ appointment.committee.get_absolute_url }}">
+          {{ appointment.committee }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>
+    None yet.
+  </p>  
+{% endif %}
+
+<h2>Appointments Declined</h2>
+{% if declined %}
+  <ul class="list-unstyled">
+    {% for appointment in declined %}
+      <li>
+        <a href="{{ appointment.candidate.get_absolute_url }}">
+          {{ appointment.candidate }}
+        </a>
+        for 
+        <a href="{{ appointment.committee.get_absolute_url }}">
+          {{ appointment.committee }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>
+    None yet.
+  </p>  
+{% endif %}
+  
+{% endblock content %}
