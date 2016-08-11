@@ -6,7 +6,7 @@ from django.db import migrations
 
 def create_chairs_group(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
-    chairs = Group.objects.create(name='Chairs')
+    chairs = Group.objects.get_or_create(name='Chairs')
 
     # We can't add the can_appoint permission here, because permissions
     # specified in Meta are created on the post_migrate signal. Add permissions
