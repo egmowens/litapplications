@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.db import models
 
 
+
 class RecentVolunteersManager(models.Manager):
     """
     This class will act as the default manager for the Candidate model.
@@ -16,11 +17,13 @@ class RecentVolunteersManager(models.Manager):
     """
     def get_queryset(self):
         one_year_ago = date.today() - timedelta(days=365)
+        # Query = recent candidates |or| candidates being considered.
+        query = models.Q(form_date__gte=one_year_ago) | models.Q(
+                    appointments__status__in=[
+                        Appointment.POTENTIAL, Appointment.RECOMMENDED
+                    ])
         return super(RecentVolunteersManager, self).get_queryset().filter(
-                form_date__gte=one_year_ago
-            ).exclude(appointments__status__in=[
-                    Appointment.POTENTIAL, Appointment.RECOMMENDED
-            ])
+            query).distinct()
 
 
 
