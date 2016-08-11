@@ -23,6 +23,7 @@ class Committee(models.Model):
     class Meta:
         verbose_name = "Committee"
         verbose_name_plural = "Committees"
+        ordering = ['long_name']
 
     def __str__(self):
         return self.long_name
