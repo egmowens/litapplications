@@ -193,11 +193,11 @@ class AppointmentsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView
     def get_context_data(self, **kwargs):
         context = super(AppointmentsView, self).get_context_data(**kwargs)
         context['recommended'] = Appointment.objects.filter(
-            status=Appointment.RECOMMENDED).order_by('committee')
+            status=Appointment.RECOMMENDED).order_by('candidate')
         context['accepted'] = Appointment.objects.filter(
-            status=Appointment.ACCEPTED).order_by('committee')
+            status=Appointment.ACCEPTED).order_by('candidate')
         context['declined'] = Appointment.objects.filter(
-            status=Appointment.DECLINED).order_by('committee')
+            status=Appointment.DECLINED).order_by('candidate')
 
         context['status_choices'] = ['----',
                                      Appointment.SENT,
