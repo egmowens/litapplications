@@ -45,6 +45,9 @@ class Candidate(models.Model):
     notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
+    starred = models.BooleanField(default=False,
+        help_text='Candidates that the chair wants the commmittee to pay '
+            'particular attention to.')
 
     review_complete = models.BooleanField(default=False,
         help_text='Have recommendations been finalized?')
