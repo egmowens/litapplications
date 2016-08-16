@@ -110,7 +110,7 @@ Name, link to charge, notes on requirements (entered by committee member),
           <h4>Applicant</h4>
           {% for candidate in applicants %}
             <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
 
@@ -118,7 +118,7 @@ Name, link to charge, notes on requirements (entered by committee member),
           <h4>Potential</h4>
           {% for candidate in potential %}
             <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
 
@@ -126,7 +126,7 @@ Name, link to charge, notes on requirements (entered by committee member),
           <h4>Recommended</h4>
           {% for candidate in recommended %}
             <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
       </div>
@@ -136,16 +136,17 @@ Name, link to charge, notes on requirements (entered by committee member),
           <h4>Appointment sent...</h4>
           {% for candidate in sent %}
             <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
       </div>
 
       <h3>Yes!</h3>
+      <div class="row">
         <div class="col-xs-12 col-sm-3">
           <h4>Appointment accepted</h4>
           {% for candidate in accepted %}
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
       </div>
@@ -156,14 +157,14 @@ Name, link to charge, notes on requirements (entered by committee member),
           <h4>Not recommended</h4>
           {% for candidate in not_recommended %}
             <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
 
         <div class="col-xs-12 col-sm-3">
           <h4>Declined appointment</h4>
           {% for candidate in declined %}
-            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
       </div>

@@ -16,7 +16,7 @@
     </div>
 
     {% for candidate in unfinished %}
-      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% empty %}
       <p>
         All reviewed! Awesome job!
@@ -42,7 +42,7 @@
     </div>
 
     {% for candidate in pending %}
-      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% endfor %}
   </div>
 
@@ -59,7 +59,7 @@
     </div>
     
     {% for candidate in done %}
-      <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+      <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% endfor %}
   </div>
 </div>

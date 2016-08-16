@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
-
+from django.utils.html import mark_safe
 
 
 class RecentVolunteersManager(models.Manager):
@@ -86,6 +86,14 @@ class Candidate(models.Model):
             return self.IN_PROCESS
         else:
             return self.UNREVIEWED
+
+
+    def get_html_name(self):
+        if self.starred:
+            return mark_safe('<span class="glyphicon glyphicon-star text-primary">'
+                             '</span>{name}'.format(name=self))
+        else:
+            return self
 
     #
     # Managers

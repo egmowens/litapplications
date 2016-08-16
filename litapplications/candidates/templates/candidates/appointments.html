@@ -20,7 +20,7 @@
         <div class="row">
           <div class="col-xs-12 col-sm-3">
             <a href="{{ appointment.candidate.get_absolute_url }}">
-              {{ appointment.candidate }}
+              {{ appointment.candidate.get_html_name }}
             </a>
             for 
             <a href="{{ appointment.committee.get_absolute_url }}">
@@ -56,7 +56,7 @@
     {% for appointment in accepted %}
       <li>
         <a href="{{ appointment.candidate.get_absolute_url }}">
-          {{ appointment.candidate }}
+          {{ appointment.candidate.get_html_name }}
         </a>
         for 
         <a href="{{ appointment.committee.get_absolute_url }}">
@@ -77,7 +77,7 @@
     {% for appointment in declined %}
       <li>
         <a href="{{ appointment.candidate.get_absolute_url }}">
-          {{ appointment.candidate }}
+          {{ appointment.candidate.get_html_name }}
         </a>
         for 
         <a href="{{ appointment.committee.get_absolute_url }}">
