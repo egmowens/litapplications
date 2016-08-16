@@ -13,5 +13,7 @@ admin.site.register(Candidate, CandidateAdmin)
 class AppointmentAdmin(admin.ModelAdmin):
     search_fields = ('committee', 'candidate')
     list_display = ('committee', 'candidate', 'status')
+    list_filter = ('status',)
+    ordering = ('committee', 'status')
 
 admin.site.register(Appointment, AppointmentAdmin)
