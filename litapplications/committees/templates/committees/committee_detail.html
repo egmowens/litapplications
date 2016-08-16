@@ -104,7 +104,7 @@ Name, link to charge, notes on requirements (entered by committee member),
         
       {% endif %}
 
-      <h3>Maybe/yes</h3>
+      <h3>Maybe</h3>
       <div class="row">
         <div class="col-xs-12 col-sm-3">
           <h4>Applicant</h4>
@@ -131,7 +131,16 @@ Name, link to charge, notes on requirements (entered by committee member),
         </div>
 
         <div class="col-xs-12 col-sm-3">
-          <h4>Appointment accepted!</h4>
+          <h4>Appointment sent...</h4>
+          {% for candidate in sent %}
+            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
+          {% endfor %}
+        </div>
+
+      <h3>Yes!</h3>
+        <div class="col-xs-12 col-sm-3">
+          <h4>Appointment accepted</h4>
           {% for candidate in accepted %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate }}</a><br />
           {% endfor %}
