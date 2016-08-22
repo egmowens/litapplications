@@ -57,7 +57,6 @@ def ingest_file(request, file_obj):
         candidate = Candidate()
         candidate.ala_id = entity[ALA_ID_KEY]
         _update_fields(candidate, entity)
-        candidate.save()
 
         return candidate
 
@@ -66,12 +65,18 @@ def ingest_file(request, file_obj):
         ala_id = entity[ALA_ID_KEY]
 
         # If ALA ID is new, create a Candidate accordingly
-        if not Candidate.objects.filter(ala_id=ala_id).count():
-            candidate = _create_candidate(entity)
-        else:
-            candidate = Candidate.objects.get(ala_id=ala_id)
+        try:
+            # Make sure to look at ALL candidates, not just those exposed by
+            # the default manager; if people have resubmitted forms after
+            # having been dormant for a while, we want to update their
+            # existing record, not try to create a new one (and fail when the
+            # database rightly disallows two records with the same ALA ID).
+            candidate = Candidate.even_obsolete.get(ala_id=ala_id)
             _update_fields(candidate, entity)
-            candidate.save()
+        except Candidate.DoesNotExist:
+            candidate = _create_candidate(entity)
+
+        candidate.save()
 
         if not ((candidate.first_name == entity[FIRST_NAME_KEY]) and
                 (candidate.last_name == entity[LAST_NAME_KEY])):

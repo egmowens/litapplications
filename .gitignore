@@ -1,3 +1,4 @@
+*.dump
 personal/
 
 # Created by https://www.gitignore.io/api/python,sublimetext,osx,django,vim
