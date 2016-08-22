@@ -45,9 +45,9 @@ class Candidate(models.Model):
     notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
-    starred = models.BooleanField(default=False,
-        help_text='Candidates that the chair wants the commmittee to pay '
-            'particular attention to.')
+    chair_notes = models.TextField(blank=True,
+        help_text='Any information from the chair on why the committee should '
+            'particularly consider this candidate.')
 
     review_complete = models.BooleanField(default=False,
         help_text='Have recommendations been finalized?')
@@ -94,6 +94,12 @@ class Candidate(models.Model):
                              '</span>{name}'.format(name=self))
         else:
             return self
+
+    @property
+    def starred(self):
+        # Any candidate with notes from the chair can be shown as starred in the
+        # interface using this property.
+        return bool(self.chair_notes)
 
     #
     # Managers

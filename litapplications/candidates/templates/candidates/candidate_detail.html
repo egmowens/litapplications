@@ -5,6 +5,18 @@
 {% block content %}
   <h2>{{ object }}</h2>
 
+  {% if object.starred %}
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Notes from the chair</h3>
+      </div>
+      <div class="panel-body">
+        {{ object.chair_notes }}
+      </div>
+    </div>
+    
+  {% endif %}
+
   <h3>Committees</h3>
 
   <div class="row">
