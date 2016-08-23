@@ -1,6 +1,10 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.views.generic.base import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
@@ -9,6 +13,9 @@ from litapplications.candidates.models import Candidate, Appointment
 
 from .forms import UpdateNotesForm, UpdateNumbersForm
 from .models import Committee
+
+logger = logging.getLogger(__name__)
+
 
 class CommitteeListView(LoginRequiredMixin, ListView):
     model = Committee
@@ -74,7 +81,7 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
 
 
 
-class CommitteeUpdateNotesView(LoginRequiredMixin, UpdateView):
+class UpdateNotesView(LoginRequiredMixin, UpdateView):
     model = Committee
     fields = ['notes']
 
@@ -98,7 +105,7 @@ class CommitteeUpdateNotesView(LoginRequiredMixin, UpdateView):
 
 
 
-class CommitteeUpdateNumbersView(LoginRequiredMixin, UpdateView):
+class UpdateNumbersView(LoginRequiredMixin, UpdateView):
     model = Committee
     fields = ['min_appointees', 'max_appointees']
 
@@ -120,3 +127,25 @@ class CommitteeUpdateNumbersView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return self.get_object().get_absolute_url()
+
+
+
+class UpdateOwnerView(LoginRequiredMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        try:
+            committee = Committee.objects.get(pk=self.kwargs['pk'])
+        except Committee.DoesNotExist:
+            # ValueError will be raised if the status cannot be cast to int.
+            logger.exception('Tried to update status for nonexistent committee')
+            return HttpResponseBadRequest()
+
+        committee.owner = request.user
+        committee.save()
+
+        messages.add_message(request, messages.SUCCESS,
+            'You now own {committee}. Thank you for working on appointments '
+            'today!'.format(committee=committee))
+
+        return HttpResponseRedirect(reverse_lazy('committees:list'))

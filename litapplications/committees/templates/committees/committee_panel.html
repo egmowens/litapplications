@@ -37,14 +37,26 @@
               </p>
             {% endif %}
           {% endif %}
+          </div>
 
-          <p>
-            <strong>Owner:</strong> {% if committee.owner %}
-              {{ committee.owner }}
+          <hr>
+
+          <p class="text-center">
+            {% if committee.owner %}
+              <strong>Owner:</strong> {{ committee.owner }}
+              {% ifnotequal committee.owner user %}
+                <form action="{% url 'committees:update_owner' committee.pk %}" method="post" class="text-center">
+                  {% csrf_token %}
+                  <button name="update" class="btn btn-sm btn-default" value="own">Take ownership</button>
+                </form>
+              {% endifnotequal %}
             {% else %}
-              <span class="bg-info">Needs owner</span>
+              <strong>Owner:</strong> <span class="bg-info">Needs owner</span>
+              <form action="{% url 'committees:update_owner' committee.pk %}" method="post" class="text-center">
+                {% csrf_token %}
+                <button name="update" class="btn btn-primary" value="own">Take ownership</button>
+              </form>
             {% endif %}
           </p>
-        </div>
       </div>
     </div>
