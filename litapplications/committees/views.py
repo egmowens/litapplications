@@ -86,7 +86,7 @@ class UpdateNotesView(LoginRequiredMixin, UpdateView):
     fields = ['notes']
 
     def form_invalid(self, form):
-        response = super(CommitteeUpdateNotesView, self).form_invalid(form)
+        response = super(UpdateNotesView, self).form_invalid(form)
         for error in form.errors.values():
             messages.add_message(self.request, messages.WARNING,
                 error.as_data()[0][0]) # just the message, no formatting
@@ -97,7 +97,7 @@ class UpdateNotesView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS,
             'Update successful. Thank you for working on appointments today!')
-        return super(CommitteeUpdateNotesView, self).form_valid(form)
+        return super(UpdateNotesView, self).form_valid(form)
 
 
     def get_success_url(self):
@@ -110,7 +110,7 @@ class UpdateNumbersView(LoginRequiredMixin, UpdateView):
     fields = ['min_appointees', 'max_appointees']
 
     def form_invalid(self, form):
-        super(CommitteeUpdateNumbersView, self).form_invalid(form)
+        super(UpdateNumbersView, self).form_invalid(form)
 
         for error in form.errors.values():
             messages.add_message(self.request, messages.WARNING,
@@ -122,7 +122,7 @@ class UpdateNumbersView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS,
             'Update successful. Thank you for working on appointments today!')
-        return super(CommitteeUpdateNumbersView, self).form_valid(form)
+        return super(UpdateNumbersView, self).form_valid(form)
 
 
     def get_success_url(self):
