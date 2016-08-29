@@ -36,8 +36,9 @@ class EmailType(models.Model):
         verbose_name = "EmailType"
         verbose_name_plural = "EmailTypes"
 
+
     def __str__(self):
-        pass
+        return '{self.trigger} from {self.from_name}'.format(self=self)
 
 
 
@@ -54,13 +55,17 @@ class EmailMessage(models.Model):
         verbose_name = "EmailMessage"
         verbose_name_plural = "EmailMessages"
 
+
     def __str__(self):
-        pass
+        return '{self.emailtype.trigger} for {self.address} ' \
+            '(status {self.status})'.format(self=self)
+
 
     def has_been_sent(self):
         # See https://sendgrid.com/docs/Glossary/email_error_messages.html
         # for status codes. Only 250 is a successful sending.
         return self.status == 250
+
 
     def has_failed(self):
         # These are hard failures: ones which won't be retried. Sendgrid will
