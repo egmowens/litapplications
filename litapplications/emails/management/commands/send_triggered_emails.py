@@ -27,7 +27,8 @@ class Command(BaseCommand):
             # We're going to be altering messages in the course of this loop,
             # so let's iterate over the IDs and not the message objects
             # themselves.
-            message = EmailMessage.objects.get(id=msg_id)
+            # Note that values() returns a list of dicts, {'field_name': value}.
+            message = EmailMessage.objects.get(id=msg_id['id'])
 
             from_email = Email("andromeda.yelton@gmail.com")
             to_email = Email(message.address)
