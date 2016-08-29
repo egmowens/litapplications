@@ -13,5 +13,4 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 DEBUG = False
 
-SENDGRID_USERNAME = os.environ.get('SENDGRID_USERNAME', None)
-SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD', None)
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', None)

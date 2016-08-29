@@ -1,5 +1,6 @@
 import logging
-import sendgrid
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Email, Content, Mail
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -12,13 +13,13 @@ class Command(BaseCommand):
     help = 'Sends queued emails'
 
     def handle(self, *args, **options):
-        if ((not hasattr(settings, 'SENDGRID_USERNAME')) or
-            (not hasattr(settings, 'SENDGRID_PASSWORD'))):
-
+        if not hasattr(settings, 'SENDGRID_API_KEY'):
             return
 
-        sg_instance = sendgrid.SendGridClient(settings.SENDGRID_USERNAME,
-                                              settings.SENDGRID_PASSWORD)
+        if not settings.SENDGRID_API_KEY:
+            return
+
+        sg_api = SendGridAPIClient(apikey=settings.SENDGRID_API_KEY)
 
         msg_ids = EmailMessage.objects.filter(status__isnull=True).values('id')
 
@@ -27,8 +28,9 @@ class Command(BaseCommand):
             # so let's iterate over the IDs and not the message objects
             # themselves.
             message = EmailMessage.objects.get(id=msg_id)
-            email = sg_instance.Mail()
-            email.add_to(message.address)
+
+            from_email = Email("andromeda.yelton@gmail.com")
+            to_email = Email(message.address)
 
             try:
                 subject = message.emailtype.subject.format(
@@ -38,7 +40,6 @@ class Command(BaseCommand):
                 # If users have screwed up entering {first_name} or {last_name},
                 # format() will throw a KeyError.
                 subject = 'LITA Appointments'
-            email.set_subject(subject)
 
             try:
                 body = message.emailtype.body.format(
@@ -48,10 +49,11 @@ class Command(BaseCommand):
                 # This may look like a bad mail merge, but we can't anticipate
                 # a substitute.
                 body = message.emailtype.body
-            email.set_text(body)
+            content = Content("text/plain", body)
 
-            message.set_from(message.emailtype.from_name)
+            mail = Mail(from_email, subject, to_email, content)
 
-            status, _ = sg_instance.send(message)
-            message.status = status
+            response = sg_api.client.mail.send.post(request_body=mail.get())
+
+            message.status = response.status_code
             message.save()
