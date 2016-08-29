@@ -21,6 +21,30 @@
 
   <div class="row">
     <div class="col-xs-12 col-sm-6">
+
+      {% if appointments %}
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h3 class="panel-title">Already appointed to:</h3>
+          </div>
+          <div class="panel-body">
+            <em>
+              Please consider other candidates for any remaining appointments,
+              unless there is a good reason to cross-appoint this person!
+            </em>
+            <ul class="list-unstyled">
+              {% for committee in appointments %}
+                <li>
+                  <a href="{{ committee.get_absolute_url }}">
+                    {{ committee }}
+                  </a>                
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">Under consideration for...</h3>

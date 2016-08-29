@@ -64,10 +64,15 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
-                Appointment.RECOMMENDED
+                Appointment.RECOMMENDED,
+                Appointment.SENT
             ]).distinct()
         context['other_committees'] = Committee.objects.exclude(
             appointments__candidate=obj).distinct()
+        context['appointments'] = Committee.objects.filter(
+                appointments__candidate=obj,
+                appointments__status=Appointment.ACCEPTED
+            ).distinct()
         return context
 
 
