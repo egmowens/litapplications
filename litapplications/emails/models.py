@@ -33,8 +33,8 @@ class EmailType(models.Model):
         help_text='Name of the person that this email should appear to be from')
 
     class Meta:
-        verbose_name = "Email"
-        verbose_name_plural = "Emails"
+        verbose_name = "EmailType"
+        verbose_name_plural = "EmailTypes"
 
     def __str__(self):
         pass
