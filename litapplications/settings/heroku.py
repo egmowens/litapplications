@@ -1,3 +1,5 @@
+import os
+
 from .base import *
 
 # Parse database configuration from $DATABASE_URL
@@ -9,4 +11,7 @@ ALLOWED_HOSTS = ['morning-eyrie-79104.herokuapp.com/']
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-DJANGO_DEBUG = False
+DEBUG = False
+
+SENDGRID_USERNAME = os.environ.get('SENDGRID_USERNAME')
+SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
