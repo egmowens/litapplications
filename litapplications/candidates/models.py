@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from datetime import date, timedelta
 
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from django.utils.html import mark_safe
@@ -40,14 +39,14 @@ class Candidate(models.Model):
     TYPE_UNKNOWN = 7
 
     LIBRARY_TYPE_IMAGES = {
-        TYPE_PUBLIC: static('img/icons/librarysymbol.png'),
-        TYPE_ACADEMIC: static('img/icons/school.png'),
-        TYPE_SCHOOL: static('img/icons/lecture.svg'),
-        TYPE_SPECIAL: static('img/icons/snowflake.svg'),
-        TYPE_STUDENT: static('img/icons/mortarboard.svg'),
-        TYPE_VENDOR: static('img/icons/briefcase.svg'),
-        TYPE_OTHER: static('img/icons/book.svg'),
-        TYPE_UNKNOWN: static('img/icons/blank.svg'),
+        TYPE_PUBLIC: '/static/img/icons/librarysymbol.png',
+        TYPE_ACADEMIC: '/static/img/icons/school.png',
+        TYPE_SCHOOL: '/static/img/icons/lecture.svg',
+        TYPE_SPECIAL: '/static/img/icons/snowflake.svg',
+        TYPE_STUDENT: '/static/img/icons/mortarboard.svg',
+        TYPE_VENDOR: '/static/img/icons/briefcase.svg',
+        TYPE_OTHER: '/static/img/icons/book.svg',
+        TYPE_UNKNOWN: '/static/img/icons/blank.svg',
     }
 
     LIBRARY_TYPE_CHOICES = (
