@@ -47,6 +47,10 @@ class CandidateListView(LoginRequiredMixin, ListView):
                 Appointment.RECOMMENDED]
             ).exclude(appointments=None).distinct()
 
+        context['library_key'] = \
+            [(libtype[1], Candidate.LIBRARY_TYPE_IMAGES[libtype[0]])
+                for libtype in Candidate.LIBRARY_TYPE_CHOICES]
+
         return context
 
 

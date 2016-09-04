@@ -63,4 +63,13 @@
     {% endfor %}
   </div>
 </div>
+<hr/>
+<div class="row">
+  {% for type in library_key %}
+      <div class="col-xs-6 col-sm-3">
+        <img src="{{ type.1 }}" class="library-type-icon"> {{ type.0 }}
+      </div>
+  {% endfor %}
+</div>
+
 {% endblock content %}
