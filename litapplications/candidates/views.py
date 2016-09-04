@@ -12,7 +12,7 @@ from django.views.generic.list import ListView
 
 from litapplications.committees.models import Committee
 
-from .forms import UpdateNotesForm
+from .forms import UpdateNotesForm, UpdateLibraryTypeForm
 from .models import Candidate, Appointment
 
 logger = logging.getLogger(__name__)
@@ -77,6 +77,10 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                 appointments__candidate=obj,
                 appointments__status=Appointment.ACCEPTED
             ).distinct()
+
+        context['libtype_form'] = UpdateLibraryTypeForm(
+            instance=self.get_object())
+
         return context
 
 
@@ -86,6 +90,19 @@ class UpdateNotesView(LoginRequiredMixin, UpdateView):
     fields = ['notes']
 
     def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS,
+            'Notes updated.')
+        return self.get_object().get_absolute_url()
+
+
+
+class UpdateLibraryTypeView(LoginRequiredMixin, UpdateView):
+    model = Candidate
+    fields = ['library_type']
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS,
+            'Library type updated.')
         return self.get_object().get_absolute_url()
 
 

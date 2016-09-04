@@ -14,8 +14,14 @@
         {{ object.chair_notes }}
       </div>
     </div>
-    
   {% endif %}
+
+  <div class="clearfix">
+    <p class="lead pull-left">
+      <img class="library-type-icon-large" alt="{{ object.get_library_type_display }}" src="{{ object.library_type_icon }}">
+    </p>
+    {% crispy libtype_form %}
+  </div>
 
   <h3>Committees</h3>
 

@@ -11,5 +11,7 @@ urlpatterns = [
         name='update_status'),
     url(r'^(?P<pk>\d+)/update/appointments/$', views.UpdateAppointmentsView.as_view(),
         name='update_appointments'),
+    url(r'^(?P<pk>\d+)/update/libtype/$', views.UpdateLibraryTypeView.as_view(),
+        name='update_libtype'),
     url(r'^appointments/', views.AppointmentsView.as_view(), name='appointments'),
 ]
