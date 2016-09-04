@@ -28,10 +28,6 @@ class RecentVolunteersManager(models.Manager):
 
 
 class Candidate(models.Model):
-    REVIEWED = 'Review complete'
-    IN_PROCESS = 'Review in process'
-    UNREVIEWED = 'Review not yet started'
-
     ala_id = models.CharField(max_length=15, unique=True)
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30)
@@ -48,9 +44,6 @@ class Candidate(models.Model):
     chair_notes = models.TextField(blank=True,
         help_text='Any information from the chair on why the committee should '
             'particularly consider this candidate.')
-
-    review_complete = models.BooleanField(default=False,
-        help_text='Have recommendations been finalized?')
 
     class Meta:
         verbose_name = "Candidate"
@@ -78,15 +71,6 @@ class Candidate(models.Model):
             return '{self.state}'.format(self=self)
         else:
             return 'unknown place of residence'
-
-    def review_status(self):
-        if self.review_complete:
-            return self.REVIEWED
-        elif self.appointments.count():
-            return self.IN_PROCESS
-        else:
-            return self.UNREVIEWED
-
 
     def get_html_name(self):
         if self.starred:
