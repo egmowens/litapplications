@@ -114,11 +114,17 @@ class Candidate(models.Model):
         else:
             star = ''
 
-        library_type = '<img class="library-type-icon" src="{src}">'.format(
-            src=self.LIBRARY_TYPE_IMAGES[self.library_type])
+        library_type = '<img class="library-type-icon" src="{src}" alt="{alt}">'.format(
+            src=self.library_type_icon, alt=self.get_library_type_display())
 
         return mark_safe('{type}{name}{star}'.format(
             type=library_type, name=self, star=star))
+
+
+    @property
+    def library_type_icon(self):
+        return self.LIBRARY_TYPE_IMAGES[self.library_type]
+
 
     @property
     def starred(self):
