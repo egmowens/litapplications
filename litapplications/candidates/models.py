@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from datetime import date, timedelta
 
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from django.utils.html import mark_safe
@@ -28,6 +29,38 @@ class RecentVolunteersManager(models.Manager):
 
 
 class Candidate(models.Model):
+
+    TYPE_PUBLIC = 0
+    TYPE_ACADEMIC = 1
+    TYPE_SCHOOL = 2
+    TYPE_SPECIAL = 3
+    TYPE_STUDENT = 4
+    TYPE_VENDOR = 5
+    TYPE_OTHER = 6
+    TYPE_UNKNOWN = 7
+
+    LIBRARY_TYPE_IMAGES = {
+        TYPE_PUBLIC: static('img/icons/librarysymbol.png'),
+        TYPE_ACADEMIC: static('img/icons/school.png'),
+        TYPE_SCHOOL: static('img/icons/lecture.svg'),
+        TYPE_SPECIAL: static('img/icons/snowflake.svg'),
+        TYPE_STUDENT: static('img/icons/mortarboard.svg'),
+        TYPE_VENDOR: static('img/icons/briefcase.svg'),
+        TYPE_OTHER: static('img/icons/book.svg'),
+        TYPE_UNKNOWN: static('img/icons/blank.svg'),
+    }
+
+    LIBRARY_TYPE_CHOICES = (
+        (TYPE_PUBLIC, 'Public librarian'),
+        (TYPE_ACADEMIC, 'Academic librarian'),
+        (TYPE_SCHOOL, 'School librarian'),
+        (TYPE_SPECIAL, 'Special librarian'),
+        (TYPE_STUDENT, 'Student'),
+        (TYPE_VENDOR, 'Vendor'),
+        (TYPE_OTHER, 'Other'),
+        (TYPE_UNKNOWN, 'Unknown'),
+    )
+
     ala_id = models.CharField(max_length=15, unique=True)
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30)
@@ -44,6 +77,8 @@ class Candidate(models.Model):
     chair_notes = models.TextField(blank=True,
         help_text='Any information from the chair on why the committee should '
             'particularly consider this candidate.')
+    library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
+        default=TYPE_UNKNOWN)
 
     class Meta:
         verbose_name = "Candidate"
@@ -52,11 +87,11 @@ class Candidate(models.Model):
 
     #
     # Methods
-    # ---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def __str__(self):
         return '{self.first_name} {self.last_name}'.format(self=self)
-    
+
 
     def get_absolute_url(self):
         return reverse_lazy('candidates:detail', args=[self.pk])
@@ -72,12 +107,18 @@ class Candidate(models.Model):
         else:
             return 'unknown place of residence'
 
+
     def get_html_name(self):
         if self.starred:
-            return mark_safe('<span class="glyphicon glyphicon-star text-primary">'
-                             '</span>{name}'.format(name=self))
+            star = ' <span class="glyphicon glyphicon-star text-primary"></span>'
         else:
-            return self
+            star = ''
+
+        library_type = '<img class="library-type-icon" src="{src}">'.format(
+            src=self.LIBRARY_TYPE_IMAGES[self.library_type])
+
+        return mark_safe('{type}{name}{star}'.format(
+            type=library_type, name=self, star=star))
 
     @property
     def starred(self):
