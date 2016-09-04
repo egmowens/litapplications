@@ -41,7 +41,7 @@ class Candidate(models.Model):
     LIBRARY_TYPE_IMAGES = {
         TYPE_PUBLIC: '/static/img/icons/librarysymbol.png',
         TYPE_ACADEMIC: '/static/img/icons/school.png',
-        TYPE_SCHOOL: '/static/img/icons/lecture.svg',
+        TYPE_SCHOOL: '/static/img/icons/lecturer.svg',
         TYPE_SPECIAL: '/static/img/icons/snowflake.svg',
         TYPE_STUDENT: '/static/img/icons/mortarboard.svg',
         TYPE_VENDOR: '/static/img/icons/briefcase.svg',
