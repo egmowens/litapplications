@@ -10,7 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 
-from litapplications.committees.models import Committee
+from litapplications.committees.models.committees import Committee
 
 from .forms import UpdateNotesForm, UpdateLibraryTypeForm
 from .models import Candidate, Appointment

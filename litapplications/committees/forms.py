@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Committee
+from .models.committees import Committee
 
 
 class UpdateNotesForm(forms.ModelForm):

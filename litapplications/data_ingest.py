@@ -6,7 +6,7 @@ import time
 from django.contrib import messages
 
 from litapplications.candidates.models import Candidate, Appointment
-from litapplications.committees.models import Committee
+from litapplications.committees.models.committees import Committee
 
 logger = logging.getLogger(__name__)
 

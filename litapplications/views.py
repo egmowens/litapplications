@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
-from litapplications.committees.models import Committee
+from litapplications.committees.models.committees import Committee
 
 from .data_ingest import ingest_file
 from .forms import DataIngestForm

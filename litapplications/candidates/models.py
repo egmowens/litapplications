@@ -5,6 +5,8 @@ from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from django.utils.html import mark_safe
 
+from litapplications.committees.models.units import Unit
+
 
 class RecentVolunteersManager(models.Manager):
     """
@@ -73,11 +75,11 @@ class Candidate(models.Model):
     notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
+    library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
+        default=TYPE_UNKNOWN)
     chair_notes = models.TextField(blank=True,
         help_text='Any information from the chair on why the committee should '
             'particularly consider this candidate.')
-    library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
-        default=TYPE_UNKNOWN)
 
     class Meta:
         verbose_name = "Candidate"
@@ -140,6 +142,23 @@ class Candidate(models.Model):
 
 
 
+class Note(models.Model):
+    candidate = models.ForeignKey(Candidate)
+    unit = models.ForeignKey(Unit)
+    text = models.TextField()
+    privileged = models.BooleanField(help_text='Is this note written by '
+        'someone with special authority over the appointments process, '
+        'like an executive director or chair')
+
+    class Meta:
+        verbose_name = "Note"
+        verbose_name_plural = "Notes"
+
+    def __str__(self):
+        pass
+
+
+
 class Appointment(models.Model):
     APPLICANT = 'Applicant'
     POTENTIAL = 'Potential'
@@ -180,4 +199,3 @@ class Appointment(models.Model):
 
     def __str__(self):
         return '{self.candidate} for {self.committee}'.format(self=self)
-    

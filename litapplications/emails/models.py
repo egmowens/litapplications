@@ -1,5 +1,7 @@
 from django.db import models
 
+from litapplications.committees.models.units import Unit
+
 # Trigger conditions
 # ------------------------------------------------------------------------------
 #
@@ -31,10 +33,13 @@ class EmailType(models.Model):
             '{last_name} are available.')
     from_name = models.CharField(max_length=50,
         help_text='Name of the person that this email should appear to be from')
+    unit = models.ForeignKey(Unit)
+
 
     class Meta:
         verbose_name = "EmailType"
         verbose_name_plural = "EmailTypes"
+        ordering = ['trigger', 'unit']
 
 
     def __str__(self):

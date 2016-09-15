@@ -12,7 +12,7 @@ from django.views.generic.list import ListView
 from litapplications.candidates.models import Candidate, Appointment
 
 from .forms import UpdateNotesForm, UpdateNumbersForm
-from .models import Committee
+from .models.committees import Committee
 
 logger = logging.getLogger(__name__)
 

@@ -7,6 +7,8 @@ from django.db import models
 
 from litapplications.candidates.models import Appointment
 
+from .units import Unit                    
+
 
 class Committee(models.Model):
 
@@ -19,6 +21,7 @@ class Committee(models.Model):
         help_text='Link to committee charge')
     notes = models.TextField(blank=True, help_text='Skills the committee is '
         'looking for, special requirements, etc.')
+    unit = models.ForeignKey(Unit, null=True, blank=True)
 
     class Meta:
         verbose_name = "Committee"
@@ -35,6 +38,7 @@ class Committee(models.Model):
             raise ValidationError('The maximum number of appointees cannot be '
                 'less than the minimum number of appointees.')
 
+
     def get_absolute_url(self):
         return reverse_lazy('committees:detail', args=[self.pk])
 
@@ -48,6 +52,7 @@ class Committee(models.Model):
             return True
         else:
             return False
+
 
     def is_fully_staffed(self):
         if (self.appointments.filter(
