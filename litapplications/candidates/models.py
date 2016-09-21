@@ -212,10 +212,13 @@ class Appointment(models.Model):
         their permissions.
         """
         checker = ObjectPermissionChecker(user)
+
+        statuses = []
+
         if checker.has_perm(APPOINTMENT__CAN_FINALIZE, unit):
-            return [cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED, cls.NOPE,
-                    cls.SENT, cls.ACCEPTED, cls.DECLINED]
-        elif checker.has_perm(APPOINTMENT__CAN_RECOMMEND, unit):
-            return [cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED, cls.NOPE]
-        else:
-            return []
+            statuses.extend([cls.SENT, cls.ACCEPTED, cls.DECLINED])
+
+        if checker.has_perm(APPOINTMENT__CAN_RECOMMEND, unit):
+            statuses.extend([cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED,
+                             cls.NOPE])
+        return statuses
