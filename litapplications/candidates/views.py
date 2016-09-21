@@ -128,12 +128,14 @@ class UpdateStatusView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse_lazy(
                 'committees:detail', args=[committee.pk]))
 
+        settable_statuses = Appointment.settable_statuses(
+                request.user, committee.unit)
+
         try:
             assert 'batch_status' in request.POST
 
             status = request.POST['batch_status']
-            assert status in Appointment.settable_statuses(
-                request.user, committee.unit)
+            assert status in settable_statuses
         except (AssertionError, ValueError):
             # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Did not find valid data for batch editing')
@@ -152,7 +154,8 @@ class UpdateStatusView(LoginRequiredMixin, View):
                     candidate=candidate, committee=committee)
                 assert len(appointments) == 1
                 appointment = appointments[0]
-                appointment.status = status
+                if appointment.status in settable_statuses:
+                    appointment.status = status
                 appointment.save()
             except:
                 logger.exception('Could not find appointment for candidate '

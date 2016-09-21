@@ -78,7 +78,7 @@ Name, link to charge, notes on requirements (entered by committee member),
   {% if candidates %}
     <form method="post" action="{% url 'candidates:update_status' object.pk %}" id="batch_edit">
       {% csrf_token %}
-      {% if applicants or potential or recommended or not_recommended %}
+      {% if status_choices %}
         <div class="row">
           <div class="col-xs-12 col-sm-3">
             <div class="form-group">
@@ -109,7 +109,9 @@ Name, link to charge, notes on requirements (entered by committee member),
         <div class="col-xs-12 col-sm-3">
           <h4>Applicant</h4>
           {% for candidate in applicants %}
-            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% if status_choices %}
+              <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% endif %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
@@ -117,7 +119,9 @@ Name, link to charge, notes on requirements (entered by committee member),
         <div class="col-xs-12 col-sm-3">
           <h4>Potential</h4>
           {% for candidate in potential %}
-            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% if status_choices %}
+              <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% endif %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
@@ -125,7 +129,9 @@ Name, link to charge, notes on requirements (entered by committee member),
         <div class="col-xs-12 col-sm-3">
           <h4>Recommended</h4>
           {% for candidate in recommended %}
-            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% if status_choices %}
+              <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% endif %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
@@ -135,7 +141,9 @@ Name, link to charge, notes on requirements (entered by committee member),
         <div class="col-xs-12 col-sm-3">
           <h4>Appointment sent...</h4>
           {% for candidate in sent %}
-            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% if status_choices %}
+              <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% endif %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
@@ -156,7 +164,9 @@ Name, link to charge, notes on requirements (entered by committee member),
         <div class="col-xs-12 col-sm-3">
           <h4>Not recommended</h4>
           {% for candidate in not_recommended %}
-            <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% if status_choices %}
+              <input type="checkbox" name="candidates" value="{{ candidate.pk }}">
+            {% endif %}
             <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
           {% endfor %}
         </div>
