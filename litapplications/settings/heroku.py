@@ -14,5 +14,3 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 DEBUG = False
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', None)
-
-MIDDLEWARE_CLASSES.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
