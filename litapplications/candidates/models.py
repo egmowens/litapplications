@@ -75,14 +75,10 @@ class Candidate(models.Model):
     memberships = models.TextField(blank=True)
     state = models.CharField(max_length=3, blank=True)
     country = models.CharField(max_length=20, blank=True)
-    notes = models.TextField(blank=True)
     form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
     library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
         default=TYPE_UNKNOWN)
-    chair_notes = models.TextField(blank=True,
-        help_text='Any information from the chair on why the committee should '
-            'particularly consider this candidate.')
 
     class Meta:
         verbose_name = "Candidate"
@@ -132,9 +128,15 @@ class Candidate(models.Model):
 
     @property
     def starred(self):
-        # Any candidate with notes from the chair can be shown as starred in the
+        # Any candidate with privileged notes can be shown as starred in the
         # interface using this property.
-        return bool(self.chair_notes)
+        return bool(self.notes.filter(privileged=True))
+
+
+    @property
+    def special_notes(self):
+        return self.notes.filter(privileged=True)
+        
 
     #
     # Managers
@@ -146,19 +148,24 @@ class Candidate(models.Model):
 
 
 class Note(models.Model):
-    candidate = models.ForeignKey(Candidate)
-    unit = models.ForeignKey(Unit)
+    candidate = models.ForeignKey(Candidate, related_name='notes')
+    unit = models.ForeignKey(Unit, related_name='notes')
     text = models.TextField()
     privileged = models.BooleanField(help_text='Is this note written by '
         'someone with special authority over the appointments process, '
-        'like an executive director or chair')
+        'like an executive director or chair',
+        default=False)
 
     class Meta:
         verbose_name = "Note"
         verbose_name_plural = "Notes"
+        unique_together = ('candidate', 'unit', 'privileged')
 
     def __str__(self):
-        pass
+        if self.privileged:
+            return 'Special note about {c}'.format(c=self.candidate)
+        else:
+            return 'Note about {c}'.format(c=self.candidate)
 
 
 

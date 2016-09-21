@@ -4,7 +4,7 @@ from crispy_forms.layout import BaseInput, Layout
 from django import forms
 from django.core.urlresolvers import reverse
 
-from .models import Candidate
+from .models import Candidate, Note
 
 
 class StylableSubmit(BaseInput):
@@ -20,10 +20,17 @@ class StylableSubmit(BaseInput):
 
 
 
-class UpdateNotesForm(forms.ModelForm):
+class UpdateNoteForm(forms.ModelForm):
     class Meta:
-        model = Candidate
-        fields = ('notes',)
+        model = Note
+        fields = ('text',)
+
+
+
+class CreateNoteForm(forms.ModelForm):
+    class Meta:
+        model = Note
+        fields = ('text', 'unit', 'candidate')
 
 
 

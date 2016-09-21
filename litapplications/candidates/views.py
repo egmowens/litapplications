@@ -1,5 +1,7 @@
+from guardian.core import ObjectPermissionChecker
 import logging
 
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
@@ -7,12 +9,15 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, CreateView
 from django.views.generic.list import ListView
 
+from litapplications.candidates.models import Note
 from litapplications.committees.models.committees import Committee
+from litapplications.committees.models.units import (Unit,
+                                                NOTE__CAN_MAKE_CANDIDATE_NOTE)
 
-from .forms import UpdateNotesForm, UpdateLibraryTypeForm
+from .forms import UpdateNoteForm, UpdateLibraryTypeForm, CreateNoteForm
 from .models import Candidate, Appointment
 
 logger = logging.getLogger(__name__)
@@ -60,7 +65,33 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CandidateDetailView, self).get_context_data(**kwargs)
-        context['notes_form'] = UpdateNotesForm(instance=self.get_object())
+        notes = Note.objects.filter(candidate=self.get_object())
+        checker = ObjectPermissionChecker(self.request.user)
+
+        notes_forms = []
+        for note in notes:
+            if checker.has_perm(NOTE__CAN_MAKE_CANDIDATE_NOTE, note.unit):
+                update_form = UpdateNoteForm(instance=note)
+                update_form.fields['text'].label = 'Note for {unit}'.format(
+                    unit=note.unit)
+                notes_forms.append(update_form)
+
+        unnoted_units = []
+        for unit in Unit.objects.all():
+            if (checker.has_perm(NOTE__CAN_MAKE_CANDIDATE_NOTE, unit)
+                and not notes.filter(unit=unit)):
+
+                unnoted_units.append(unit.pk)
+
+        context['notes_forms'] = notes_forms
+
+        if unnoted_units:
+            create_form = CreateNoteForm(
+                initial={'candidate': self.get_object()})
+            create_form.fields['unit'].queryset = Unit.objects.filter(
+                pk__in=unnoted_units)
+            create_form.fields['candidate'].widget = forms.HiddenInput()
+            context['create_form'] = create_form
 
         obj = self.get_object()
         context['committees'] = Committee.objects.filter(
@@ -85,14 +116,25 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
 
 
 
-class UpdateNotesView(LoginRequiredMixin, UpdateView):
-    model = Candidate
-    fields = ['notes']
+class UpdateNoteView(LoginRequiredMixin, UpdateView):
+    model = Note
+    fields = ['text']
 
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS,
-            'Notes updated.')
-        return self.get_object().get_absolute_url()
+            'Note updated.')
+        return self.get_object().candidate.get_absolute_url()
+
+
+
+class CreateNoteView(LoginRequiredMixin, CreateView):
+    model = Note
+    fields = ['text', 'unit', 'candidate']
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS,
+            'Note created.')
+        return self.object.candidate.get_absolute_url()
 
 
 

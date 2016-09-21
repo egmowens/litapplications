@@ -8,11 +8,13 @@
   {% if object.starred %}
     <div class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title">Notes from the chair</h3>
+        <h3 class="panel-title">FYI...</h3>
       </div>
-      <div class="panel-body">
-        {{ object.chair_notes }}
-      </div>
+      {% for note in object.special_notes %}
+        <div class="panel-body">
+          {{ note }}
+        </div>
+      {% endfor %}
     </div>
   {% endif %}
 
@@ -158,17 +160,33 @@
     </div>
   </div>
 
+  {% if notes_forms or create_form %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Notes</h3>
+      </div>
+      <div class="panel-body">
+        {% for form in notes_forms %}
+          <form method="post" action="{% url 'candidates:update_note' form.instance.pk %}">
+            {% csrf_token %}
+            {{ form | crispy }}
+            <input type="submit" value="update note" class="btn btn-default">
+          </form>      
+        {% endfor %}
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">Notes</h3>
-    </div>
-    <div class="panel-body">
-      <form method="post" action="{% url 'candidates:update_notes' object.pk %}">
-        {% csrf_token %}
-        {{ notes_form | crispy }}
-        <input type="submit" value="update notes" class="btn btn-default">
-      </form>
-    </div>
-  </div>
+        {% if create_form and notes_forms %}
+          <hr />          
+        {% endif %}
+
+        {% if create_form %}
+          <h4>Create note for another unit</h4>
+            <form method="post" action="{% url 'candidates:create_note' %}">
+              {% csrf_token %}
+              {{ create_form | crispy }}
+              <input type="submit" value="create note" class="btn btn-default">
+            </form>
+        {% endif %}
+      </div>
+    </div>    
+  {% endif %}
 {% endblock content %}
