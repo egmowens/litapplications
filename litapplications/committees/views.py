@@ -66,13 +66,10 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             appointments__committee=obj).distinct()
 
         # For constructing the dropdown in the batch editing form.
-        # We exclude ACCEPTED, DECLINED, and SENT because committee members
-        # can't set those - they rely on choices made by the VP and candidates.
         context['status_choices'] = [choice for choice
             in Appointment.STATUS_CHOICES
-            if choice[0] not in [Appointment.ACCEPTED,
-                                 Appointment.DECLINED,
-                                 Appointment.SENT]]
+            if choice[0]
+            in Appointment.settable_statuses(self.request.user, obj.unit)]
 
         context['notes_form'] = UpdateNotesForm(instance=self.get_object())
         context['numbers_form'] = UpdateNumbersForm(instance=self.get_object())

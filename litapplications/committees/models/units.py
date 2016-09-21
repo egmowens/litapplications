@@ -1,5 +1,10 @@
 from django.db import models
 
+APPOINTMENT__CAN_RECOMMEND = 'appointment__can_recommend'
+APPOINTMENT__CAN_FINALIZE = 'appointment__can_finalize'
+EMAIL__CAN_SEND = 'email__can_send'
+NOTE__CAN_MAKE_CANDIDATE_NOTE = 'note__can_make_candidate_note'
+NOTE__CAN_MAKE_PRIVILEGED_NOTE = 'note__can_make_privileged_note'
 
 class Unit(models.Model):
     """
@@ -16,15 +21,15 @@ class Unit(models.Model):
         verbose_name_plural = "Units"
         ordering = ['name']
         permissions = (
-            ('appointment__can_recommend',
+            (APPOINTMENT__CAN_RECOMMEND,
                 'Can recommend appointments to unit committees'),
-            ('appointment__can_finalize',
+            (APPOINTMENT__CAN_FINALIZE,
                 'Can finalize appointments to unit committees'),
-            ('email__can_send',
+            (EMAIL__CAN_SEND,
                 'Can send email for unit-specific triggers'),
-            ('note__can_make_candidate_note',
+            (NOTE__CAN_MAKE_CANDIDATE_NOTE,
                 'Can make notes on candidates for unit committees'),
-            ('note__can_make_privileged_note',
+            (NOTE__CAN_MAKE_PRIVILEGED_NOTE,
                 'Can make privileged notes on candidates for unit committees'),
         )
 

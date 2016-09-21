@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 from datetime import date, timedelta
+from guardian.core import ObjectPermissionChecker
 
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
 from django.utils.html import mark_safe
 
-from litapplications.committees.models.units import Unit
+from litapplications.committees.models.units import (Unit,
+                                                     APPOINTMENT__CAN_RECOMMEND,
+                                                     APPOINTMENT__CAN_FINALIZE)
 
 
 class RecentVolunteersManager(models.Manager):
@@ -197,5 +200,22 @@ class Appointment(models.Model):
         verbose_name_plural = "Appointments"
         unique_together = (("candidate", "committee"),)
 
+
     def __str__(self):
         return '{self.candidate} for {self.committee}'.format(self=self)
+
+
+    @classmethod
+    def settable_statuses(cls, user, unit):
+        """
+        Return the list of statuses this user is allowed to set, based on
+        their permissions.
+        """
+        checker = ObjectPermissionChecker(user)
+        if checker.has_perm(APPOINTMENT__CAN_FINALIZE, unit):
+            return [cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED, cls.NOPE,
+                    cls.SENT, cls.ACCEPTED, cls.DECLINED]
+        elif checker.has_perm(APPOINTMENT__CAN_RECOMMEND, unit):
+            return [cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED, cls.NOPE]
+        else:
+            return []

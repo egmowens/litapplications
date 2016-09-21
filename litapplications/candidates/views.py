@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
@@ -132,10 +132,8 @@ class UpdateStatusView(LoginRequiredMixin, View):
             assert 'batch_status' in request.POST
 
             status = request.POST['batch_status']
-            assert status in [Appointment.APPLICANT,
-                              Appointment.POTENTIAL,
-                              Appointment.RECOMMENDED,
-                              Appointment.NOPE]
+            assert status in Appointment.settable_statuses(
+                request.user, committee.unit)
         except (AssertionError, ValueError):
             # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Did not find valid data for batch editing')
@@ -212,8 +210,7 @@ class UpdateAppointmentsView(LoginRequiredMixin, View):
 
 
 
-class AppointmentsView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
-    permission_required = 'candidates.can_appoint'
+class AppointmentsView(LoginRequiredMixin, TemplateView):
     template_name = 'candidates/appointments.html'
 
     def get_context_data(self, **kwargs):
