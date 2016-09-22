@@ -188,7 +188,7 @@
         {% endif %}
 
         {% if create_form %}
-          <h4>Create note for another unit</h4>
+          <h4>Create new note</h4>
             <form method="post" action="{% url 'candidates:create_note' %}">
               {% csrf_token %}
               {{ create_form | crispy }}
