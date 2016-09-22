@@ -15,7 +15,8 @@ from django.views.generic.list import ListView
 from litapplications.candidates.models import Note
 from litapplications.committees.models.committees import Committee
 from litapplications.committees.models.units import (Unit,
-                                                NOTE__CAN_MAKE_CANDIDATE_NOTE)
+                                                NOTE__CAN_MAKE_CANDIDATE_NOTE,
+                                                NOTE__CAN_MAKE_PRIVILEGED_NOTE)
 
 from .forms import UpdateNoteForm, UpdateLibraryTypeForm, CreateNoteForm
 from .models import Candidate, Appointment
@@ -65,7 +66,10 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CandidateDetailView, self).get_context_data(**kwargs)
-        notes = Note.objects.filter(candidate=self.get_object())
+        notes = Note.objects.filter(candidate=self.get_object(),
+            privileged=False)
+        special_notes = Note.objects.filter(candidate=self.get_object(),
+            privileged=True)
         checker = ObjectPermissionChecker(self.request.user)
 
         notes_forms = []
@@ -82,6 +86,14 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                 and not notes.filter(unit=unit)):
 
                 unnoted_units.append(unit.pk)
+
+        special_notes_forms = []
+        for note in special_notes:
+            if checker.has_perm(NOTE__CAN_MAKE_PRIVILEGED_NOTE, note.unit):
+                update_form = UpdateNoteForm(instance=note)
+                update_form.fields['text'].label = 'Note for {unit}'.format(
+                    unit=note.unit)
+                special_notes_forms.append(update_form)
 
         context['notes_forms'] = notes_forms
 
