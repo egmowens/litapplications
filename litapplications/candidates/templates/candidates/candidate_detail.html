@@ -8,9 +8,18 @@
   {% if object.starred %}
     <div class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title">FYI...</h3>
+        <h3 class="panel-title">Special notes from the chair, Executive Director, etc.</h3>
       </div>
-      {% for note in object.special_notes %}
+      {% for form in special_notes_forms %}
+        <div class="panel-body">
+          <form method="post" action="{% url 'candidates:update_note' form.instance.pk %}">
+            {% csrf_token %}
+            {{ form | crispy }}
+            <input type="submit" value="update note" class="btn btn-default">
+          </form>      
+        </div>
+      {% endfor %}
+      {% for note in special_notes_display %}
         <div class="panel-body">
           {{ note.text }}
         </div>

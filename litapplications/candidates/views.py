@@ -66,10 +66,10 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CandidateDetailView, self).get_context_data(**kwargs)
-        notes = Note.objects.filter(candidate=self.get_object(),
-            privileged=False)
-        special_notes = Note.objects.filter(candidate=self.get_object(),
-            privileged=True)
+        obj = self.get_object()
+
+        notes = Note.objects.filter(candidate=obj, privileged=False)
+        special_notes = Note.objects.filter(candidate=obj, privileged=True)
         checker = ObjectPermissionChecker(self.request.user)
 
         notes_forms = []
@@ -80,22 +80,14 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                     unit=note.unit)
                 notes_forms.append(update_form)
 
+        context['notes_forms'] = notes_forms
+
         unnoted_units = []
         for unit in Unit.objects.all():
             if (checker.has_perm(NOTE__CAN_MAKE_CANDIDATE_NOTE, unit)
                 and not notes.filter(unit=unit)):
 
                 unnoted_units.append(unit.pk)
-
-        special_notes_forms = []
-        for note in special_notes:
-            if checker.has_perm(NOTE__CAN_MAKE_PRIVILEGED_NOTE, note.unit):
-                update_form = UpdateNoteForm(instance=note)
-                update_form.fields['text'].label = 'Note for {unit}'.format(
-                    unit=note.unit)
-                special_notes_forms.append(update_form)
-
-        context['notes_forms'] = notes_forms
 
         if unnoted_units:
             create_form = CreateNoteForm(
@@ -105,7 +97,20 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
             create_form.fields['candidate'].widget = forms.HiddenInput()
             context['create_form'] = create_form
 
-        obj = self.get_object()
+        special_notes_forms = []
+        special_notes_display = []
+        for note in special_notes:
+            if checker.has_perm(NOTE__CAN_MAKE_PRIVILEGED_NOTE, note.unit):
+                update_form = UpdateNoteForm(instance=note)
+                update_form.fields['text'].label = 'Special note for ' \
+                    '{unit}'.format(unit=note.unit)
+                special_notes_forms.append(update_form)
+            else:
+                special_notes_display.append(note)
+
+        context['special_notes_forms'] = special_notes_forms
+        context['special_notes_display'] = special_notes_display
+
         context['committees'] = Committee.objects.filter(
             appointments__candidate=obj,
             appointments__status__in=[
@@ -114,8 +119,10 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                 Appointment.RECOMMENDED,
                 Appointment.SENT
             ]).distinct()
+
         context['other_committees'] = Committee.objects.exclude(
             appointments__candidate=obj).distinct()
+
         context['appointments'] = Committee.objects.filter(
                 appointments__candidate=obj,
                 appointments__status=Appointment.ACCEPTED
