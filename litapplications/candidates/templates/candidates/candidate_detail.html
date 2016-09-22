@@ -5,25 +5,33 @@
 {% block content %}
   <h2>{{ object }}</h2>
 
-  {% if object.starred %}
+  {% if special_notes_forms or special_notes_display or special_create_form %}
     <div class="panel panel-info">
       <div class="panel-heading">
         <h3 class="panel-title">Special notes from the chair, Executive Director, etc.</h3>
       </div>
-      {% for form in special_notes_forms %}
-        <div class="panel-body">
+      <div class="panel-body">
+        {% for form in special_notes_forms %}
           <form method="post" action="{% url 'candidates:update_note' form.instance.pk %}">
             {% csrf_token %}
             {{ form | crispy }}
             <input type="submit" value="update note" class="btn btn-default">
-          </form>      
-        </div>
-      {% endfor %}
-      {% for note in special_notes_display %}
-        <div class="panel-body">
-          {{ note.text }}
-        </div>
-      {% endfor %}
+          </form>
+        {% endfor %}
+        {% if special_create_form %}
+          <h4>Create new special note</h4>
+          <form method="post" action="{% url 'candidates:create_note' %}">
+            {% csrf_token %}
+            {{ special_create_form | crispy }}
+            <input type="submit" value="create note" class="btn btn-default">
+          </form>
+        {% endif %}
+        {% for note in special_notes_display %}
+          <div class="panel-body">
+            {{ note.text }}
+          </div>
+        {% endfor %}
+      </div>
     </div>
   {% endif %}
 
@@ -189,11 +197,11 @@
 
         {% if create_form %}
           <h4>Create new note</h4>
-            <form method="post" action="{% url 'candidates:create_note' %}">
-              {% csrf_token %}
-              {{ create_form | crispy }}
-              <input type="submit" value="create note" class="btn btn-default">
-            </form>
+          <form method="post" action="{% url 'candidates:create_note' %}">
+            {% csrf_token %}
+            {{ create_form | crispy }}
+            <input type="submit" value="create note" class="btn btn-default">
+          </form>
         {% endif %}
       </div>
     </div>    

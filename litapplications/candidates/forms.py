@@ -30,7 +30,10 @@ class UpdateNoteForm(forms.ModelForm):
 class CreateNoteForm(forms.ModelForm):
     class Meta:
         model = Note
-        fields = ('text', 'unit', 'candidate')
+        fields = ('text', 'unit', 'candidate', 'privileged')
+        widgets = {
+            'privileged': forms.HiddenInput(),
+        }
 
 
 

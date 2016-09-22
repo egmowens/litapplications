@@ -90,8 +90,7 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
                 unnoted_units.append(unit.pk)
 
         if unnoted_units:
-            create_form = CreateNoteForm(
-                initial={'candidate': self.get_object()})
+            create_form = CreateNoteForm(initial={'candidate': obj})
             create_form.fields['unit'].queryset = Unit.objects.filter(
                 pk__in=unnoted_units)
             create_form.fields['candidate'].widget = forms.HiddenInput()
@@ -110,6 +109,21 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
 
         context['special_notes_forms'] = special_notes_forms
         context['special_notes_display'] = special_notes_display
+
+        unnoted_special_units = []
+        for unit in Unit.objects.all():
+            if (checker.has_perm(NOTE__CAN_MAKE_PRIVILEGED_NOTE, unit)
+                and not special_notes.filter(unit=unit)):
+
+                unnoted_special_units.append(unit.pk)
+
+        if unnoted_special_units:
+            create_form = CreateNoteForm(
+                initial={'candidate': obj, 'privileged': True})
+            create_form.fields['unit'].queryset = Unit.objects.filter(
+                pk__in=unnoted_special_units)
+            create_form.fields['candidate'].widget = forms.HiddenInput()
+            context['special_create_form'] = create_form
 
         context['committees'] = Committee.objects.filter(
             appointments__candidate=obj,
