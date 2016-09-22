@@ -162,7 +162,7 @@ class UpdateNoteView(LoginRequiredMixin, UpdateView):
 
 class CreateNoteView(LoginRequiredMixin, CreateView):
     model = Note
-    fields = ['text', 'unit', 'candidate']
+    fields = ['text', 'unit', 'candidate', 'privileged']
 
     def get_success_url(self):
         messages.add_message(self.request, messages.SUCCESS,
