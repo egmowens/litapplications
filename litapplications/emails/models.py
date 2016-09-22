@@ -1,6 +1,10 @@
 from django.db import models
+from django.dispatch import Signal
 
 from litapplications.committees.models.units import Unit
+
+# Any code that wants email to be sent should send this signal.
+signal_send_email = Signal(providing_args=["trigger", "candidate", "unit"])
 
 # Trigger conditions
 # ------------------------------------------------------------------------------
@@ -18,6 +22,11 @@ class EmailType(models.Model):
     Allows a user to associate a trigger function with an email subject/body.
     This lets us send that email when that trigger happens (though you must
     separately write the logic for so doing).
+
+    It's anticipated that new chairs will write their own new email types,
+    and delete existing ones. This means that existing candidates will be
+    notified of new process, because they won't yet have received an email of
+    a given type.
     """
 
     EMAIL_TRIGGERS = (
@@ -43,7 +52,8 @@ class EmailType(models.Model):
 
 
     def __str__(self):
-        return '{self.trigger} from {self.from_name}'.format(self=self)
+        return '{self.trigger} from {self.from_name} for {self.unit}'.format(
+            self=self)
 
 
 

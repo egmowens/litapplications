@@ -7,6 +7,7 @@ from django.contrib import messages
 
 from litapplications.candidates.models import Candidate, Appointment
 from litapplications.committees.models.committees import Committee
+from litapplications.emails.models import signal_send_email, NEW_VOLUNTEER_FORM
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,8 @@ def ingest_file(request, file_obj):
 
         if not ((candidate.first_name == entity[FIRST_NAME_KEY]) and
                 (candidate.last_name == entity[LAST_NAME_KEY])):
-            warnings.append('Candidate has changed names - verify info is correct')
+            warnings.append('Candidate {candidate} has changed names - '
+                'verify info is correct'.format(candidate=candidate))
 
         # Find the referenced committee (and don't do anything if we can't)
         committee_code = entity[COMMITTEE_KEY]
@@ -89,7 +91,8 @@ def ingest_file(request, file_obj):
             committee = Committee.objects.filter(
                 short_code__iexact=committee_code)[0] #case insensitive
         except IndexError:
-            logger.exception('Could not find committee')
+            logger.exception('Could not find committee for {key}'.format(
+                key=entity[COMMITTEE_KEY]))
             warnings.append('Could not find committee for {key}'.format(
                 key=entity[COMMITTEE_KEY]))
             return
@@ -109,6 +112,13 @@ def ingest_file(request, file_obj):
             appointment.status = Appointment.ACCEPTED
 
         appointment.save()
+
+        # This is a new form, so we might need to send a new candidate email.
+        signal_send_email.send(
+            sender=ingest_file,
+            trigger=NEW_VOLUNTEER_FORM,
+            candidate=candidate,
+            unit=committee.unit)
 
 
     def parse_file(file_obj):

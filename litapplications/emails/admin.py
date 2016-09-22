@@ -11,6 +11,6 @@ admin.site.register(EmailMessage, EmailMessageAdmin)
 
 
 class EmailTypeAdmin(admin.ModelAdmin):
-    list_display = ('trigger',)
+    list_display = ('trigger', 'unit', 'from_name')
 
 admin.site.register(EmailType, EmailTypeAdmin)

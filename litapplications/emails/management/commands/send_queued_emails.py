@@ -40,7 +40,7 @@ class Command(BaseCommand):
             except KeyError:
                 # If users have screwed up entering {first_name} or {last_name},
                 # format() will throw a KeyError.
-                subject = 'LITA Appointments'
+                subject = 'About your ALA committee volunteering'
 
             try:
                 body = message.emailtype.body.format(

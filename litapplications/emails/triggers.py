@@ -1,54 +1,69 @@
-from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from litapplications.candidates.models import Candidate
-
-from .models import EmailType, EmailMessage, NEW_VOLUNTEER_FORM
-from .tasks import queue_triggered_emails
-
-
-def queue_triggered_emails(emailtypes, instance):
-    """
-    Accepts an iterable of EmailType instances to be sent, plus the a recipient
-    candidate instance (possibly for a candidate not yet saved to the db).
-    emailtypes may be empty; instance properties may be blank. Creates a record
-    of emails to be sent. Heroku scheduler will check for expected, unsent
-    emails and send them.
-    """
-    if instance.address:
-        for emailtype in emailtypes:
-            email = EmailMessage()
-            email.address = instance.address
-            email.first_name = instance.first_name
-            email.last_name = instance.last_name
-            email.emailtype = emailtype
-            email.save()
+from .models import (EmailType,
+                     EmailMessage,
+                     NEW_VOLUNTEER_FORM,
+                     signal_send_email)
 
 
-# Trigger functions
+# This function receives the email-sending signal and delegates to appropriate
+# functions for fulfillment.
+@receiver(signal_send_email)
+def email_candidate(sender, trigger, candidate, unit, **kwargs):
+    if trigger == NEW_VOLUNTEER_FORM:
+        email_new_volunteer(candidate, unit)
+
+
+# Fulfillment functions
 # ------------------------------------------------------------------------------
 #
-# These are functions that should be fired when trigger conditions are met. They
-# should all be @receivers of a relevant signal.
-@receiver(pre_save, sender=Candidate)
-def email_candidate_on_form_update(sender, instance, **kwargs):
-    """
-    Acknowledge receipt of new volunteer form.
+# These functions handle constructing the emails for each trigger.
+#
+# Note that Heroku scheduler will check for unsent EmailMessages periodically
+# and fire a management command to send them. Therefore there is *no need* to
+# do any sort of sending here; constructing the message will suffice.
+#
+# Using Scheduler keeps email-sending out of the request/response loop and
+# prevents timeouts, but is lighter-weight than celery - let's see if it works!
 
-    For new candidates, or existing candidates with new volunteer forms, this
-    will send whatever emails are attached to the NEW_VOLUNTEER_FORM trigger.
+
+def email_new_volunteer(candidate, unit):
     """
-    emailtypes = EmailType.objects.filter(trigger=NEW_VOLUNTEER_FORM)
-    if instance.id:
-        # If this is an already existing candidate about to be updated, and
-        # the date of the new volunteer form is greater than the date of the
-        # existing one - that is, the candidate has submitted a new form -
-        # send an email.
-        orig_form_date = Candidate.even_obsolete.get(pk=instance.id).form_date
-        current_form_date = instance.form_date
-        if current_form_date > orig_form_date:
-            queue_triggered_emails(emailtypes, instance)
-    else:
-        # No instance.id means this candidate hasn't been saved to the database
-        # ever - it's a new candidate, so we should definitely send email.
-        queue_triggered_emails(emailtypes, instance)
+    Acknowledge receipt of new volunteer form, if we have not previously
+    acknowledged receipt. This is intended for 'welcome to the system, here is
+    the process' sorts of emails, not 'we got your form, thanks' sorts.
+
+    This will send whatever emails are attached to the NEW_VOLUNTEER_FORM
+    trigger.
+    """
+    if not candidate.address:
+        # If we don't have an email address for this candidate, we're not going
+        # to be able to send emails, so there's no point in going further.
+        return
+
+    # Hopefully there's just one of these, but we haven't enforced that in the
+    # db.
+    emailtypes = EmailType.objects.filter(trigger=NEW_VOLUNTEER_FORM, unit=unit)
+
+    for emailtype in emailtypes:
+        # If we've already sent an email of this type to this address, don't
+        # resend. It's intended to be sent only once, not to acknowledge
+        # receipt each time.
+        if EmailMessage.objects.filter(
+            emailtype=emailtype,
+            address=candidate.address):
+
+            pass
+
+        else:
+            # This might send an email to the same candidate more than once,
+            # if their email address has changed. We're going to decide that's
+            # okay - people frequently forget to update their email addresses
+            # with ALA as they change jobs, etc., so the previous email may have
+            # gone to an inbox that no longer exists.
+            email = EmailMessage()
+            email.address = candidate.address
+            email.first_name = candidate.first_name
+            email.last_name = candidate.last_name
+            email.emailtype = emailtype
+            email.save()
