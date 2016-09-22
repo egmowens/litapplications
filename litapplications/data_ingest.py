@@ -129,8 +129,9 @@ def ingest_file(request, file_obj):
 
         for row in table.find_all('tr'):
             values = [val.text.encode('utf8') for val in row.find_all('td')]
-            entity = dict(zip(keys, values))
-            _process_entity(entity)
+            if values:
+                entity = dict(zip(keys, values))
+                _process_entity(entity)
 
     parse_file(file_obj)
 
