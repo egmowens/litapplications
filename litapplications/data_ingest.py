@@ -7,7 +7,8 @@ from django.contrib import messages
 
 from litapplications.candidates.models import Candidate, Appointment
 from litapplications.committees.models.committees import Committee
-from litapplications.emails.models import signal_send_email, NEW_VOLUNTEER_FORM
+from litapplications.emails.models import NEW_VOLUNTEER_FORM
+from litapplications.emails.signals import signal_send_email
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,7 @@ def ingest_file(request, file_obj):
             trigger=NEW_VOLUNTEER_FORM,
             candidate=candidate,
             unit=committee.unit)
+        print 'signal sent'
 
 
     def parse_file(file_obj):

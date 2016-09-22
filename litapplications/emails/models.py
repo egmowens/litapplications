@@ -1,10 +1,7 @@
 from django.db import models
-from django.dispatch import Signal
 
 from litapplications.committees.models.units import Unit
 
-# Any code that wants email to be sent should send this signal.
-signal_send_email = Signal(providing_args=["trigger", "candidate", "unit"])
 
 # Trigger conditions
 # ------------------------------------------------------------------------------
