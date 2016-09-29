@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.dispatch import receiver, Signal
 
 from .models import (EmailType,
@@ -41,6 +43,12 @@ def email_new_volunteer(candidate, unit):
     if not candidate.email:
         # If we don't have an email address for this candidate, we're not going
         # to be able to send emails, so there's no point in going further.
+        return
+
+    if not candidate.form_date >= date.today() - timedelta(days=30):
+        # Don't actally send this email unless the form submission was in the
+        # past month; we don't want to inadvertently send welcome emails to
+        # people who volunteered years ago.
         return
 
     # Hopefully there's just one of these, but we haven't enforced that in the

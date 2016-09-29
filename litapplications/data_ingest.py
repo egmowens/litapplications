@@ -55,6 +55,7 @@ def ingest_file(request, file_obj):
         raw_date = entity[STATUS_DATE_KEY]
         candidate.form_date = datetime(*(time.strptime(raw_date, "%b-%d-%Y")[0:6]))
 
+
     def _create_candidate(entity):
         candidate = Candidate()
         candidate.ala_id = entity[ALA_ID_KEY]
@@ -105,6 +106,9 @@ def ingest_file(request, file_obj):
             appointment = Appointment()
             appointment.candidate = candidate
             appointment.committee = committee
+            raw_date = entity[STATUS_DATE_KEY]
+            appointment.form_date = datetime(*(
+                time.strptime(raw_date, "%b-%d-%Y")[0:6]))
 
         # Status defaults to APPLICANT, so it needn't be specified in that case.
         if entity[STATUS_KEY] == PROPOSED:
@@ -114,7 +118,7 @@ def ingest_file(request, file_obj):
 
         appointment.save()
 
-        # This is a new form, so we might need to send a new candidate email.
+        # This may be a new form; we might need to send a new candidate email.
         signal_send_email.send(
             sender=ingest_file,
             trigger=NEW_VOLUNTEER_FORM,

@@ -16,18 +16,31 @@ class RecentVolunteersManager(models.Manager):
     This class will act as the default manager for the Candidate model.
 
     It filters out candidates who do not have a recent volunteer application
-    on file, unless we have been actively considering them. The ALA database
-    does not clear out old applications, but we don't actually want to be
-    considering candidates who have not volunteered recently.
+    on file and/or an active appointment under consideration. It relies on the
+    default manager for Appointment.
+    """
+    def get_queryset(self):
+        return super(RecentVolunteersManager, self).get_queryset().filter(
+            appointments__in=Appointment.objects.all()).distinct()
+
+
+
+class RecentAppointmentsManager(models.Manager):
+    """
+    This class will act as the default manager for the Appointment model.
+
+    It filters out appointments that are more than a year old, unless we have
+    been actively considering them. The ALA database does not clear out old
+    applications, but we don't actually want to be considering appointment
+    requests from a long time ago.
     """
     def get_queryset(self):
         one_year_ago = date.today() - timedelta(days=365)
-        # Query = recent candidates |or| candidates being considered.
         query = models.Q(form_date__gte=one_year_ago) | models.Q(
-                    appointments__status__in=[
+                    status__in=[
                         Appointment.POTENTIAL, Appointment.RECOMMENDED
                     ])
-        return super(RecentVolunteersManager, self).get_queryset().filter(
+        return super(RecentAppointmentsManager, self).get_queryset().filter(
             query).distinct()
 
 
@@ -138,9 +151,17 @@ class Candidate(models.Model):
         return self.notes.filter(privileged=True)
         
 
+    @property
+    def form_date(self):
+        try:
+            return self.appointments.latest().form_date
+        except Appointment.DoesNotExist:
+            return None
+
+
     #
     # Managers
-    # ---------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     even_obsolete = models.Manager()
     objects = RecentVolunteersManager()
@@ -201,11 +222,13 @@ class Appointment(models.Model):
         'Appointments Committee member - in this case you may have to ask the '
         'candidate to fill out a committee volunteer form, and also you should '
         'be careful of overwriting this.')
+    form_date = models.DateField()
 
     class Meta:
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"
         unique_together = (("candidate", "committee"),)
+        ordering = ['form_date', 'committee']
 
 
     def __str__(self):
@@ -229,3 +252,11 @@ class Appointment(models.Model):
             statuses.extend([cls.APPLICANT, cls.POTENTIAL, cls.RECOMMENDED,
                              cls.NOPE])
         return statuses
+
+    #
+    # Managers
+    # --------------------------------------------------------------------------
+
+    even_obsolete = models.Manager()
+    objects = RecentAppointmentsManager()
+
