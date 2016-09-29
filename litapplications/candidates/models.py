@@ -88,7 +88,6 @@ class Candidate(models.Model):
     memberships = models.TextField(blank=True)
     state = models.CharField(max_length=3, blank=True)
     country = models.CharField(max_length=20, blank=True)
-    form_date = models.DateField()
     last_updated = models.DateField(auto_now=True)
     library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
         default=TYPE_UNKNOWN)
