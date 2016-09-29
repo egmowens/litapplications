@@ -120,7 +120,6 @@ def ingest_file(request, file_obj):
             trigger=NEW_VOLUNTEER_FORM,
             candidate=candidate,
             unit=committee.unit)
-        print 'signal sent'
 
 
     def parse_file(file_obj):

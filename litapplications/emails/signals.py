@@ -12,7 +12,6 @@ signal_send_email = Signal(providing_args=["trigger", "candidate", "unit"])
 # functions for fulfillment.
 @receiver(signal_send_email)
 def email_candidate(sender, trigger, candidate, unit, **kwargs):
-    print 'signal received'
     if trigger == NEW_VOLUNTEER_FORM:
         email_new_volunteer(candidate, unit)
 
