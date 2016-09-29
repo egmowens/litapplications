@@ -52,8 +52,6 @@ def ingest_file(request, file_obj):
         candidate.memberships = entity[MEMBERSHIPS_KEY]
         candidate.state = entity[STATE_KEY]
         candidate.country = entity[COUNTRY_KEY]
-        raw_date = entity[STATUS_DATE_KEY]
-        candidate.form_date = datetime(*(time.strptime(raw_date, "%b-%d-%Y")[0:6]))
 
 
     def _create_candidate(entity):
