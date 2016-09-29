@@ -1,3 +1,5 @@
+from guardian.shortcuts import get_objects_for_user
+
 from django.db import models
 
 APPOINTMENT__CAN_RECOMMEND = 'appointment__can_recommend'
@@ -5,6 +7,27 @@ APPOINTMENT__CAN_FINALIZE = 'appointment__can_finalize'
 EMAIL__CAN_SEND = 'email__can_send'
 NOTE__CAN_MAKE_CANDIDATE_NOTE = 'note__can_make_candidate_note'
 NOTE__CAN_MAKE_PRIVILEGED_NOTE = 'note__can_make_privileged_note'
+
+# People with any of the following permissions should be able to see candidates
+# with appropriately permissioned appointments or notes.
+SHOULD_SEE_CANDIDATES = [APPOINTMENT__CAN_RECOMMEND,
+                         APPOINTMENT__CAN_FINALIZE,
+                         NOTE__CAN_MAKE_CANDIDATE_NOTE,
+                         NOTE__CAN_MAKE_PRIVILEGED_NOTE]
+
+
+def get_units_visible_to_user(user):
+    """
+    Given a user, return the set of units for which that user should be able to
+    see candidate information.
+    """
+    unitlist = []
+    for perm in SHOULD_SEE_CANDIDATES:
+        units = get_objects_for_user(user,
+            'committees.{perm}'.format(perm=perm))
+        unitlist.extend(units)
+    unitlist = list(set(unitlist)) # Make distinct
+    return unitlist
 
 class Unit(models.Model):
     """

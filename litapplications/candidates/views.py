@@ -5,6 +5,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.views.generic.base import View, TemplateView
@@ -16,7 +17,8 @@ from litapplications.candidates.models import Note
 from litapplications.committees.models.committees import Committee
 from litapplications.committees.models.units import (Unit,
                                                 NOTE__CAN_MAKE_CANDIDATE_NOTE,
-                                                NOTE__CAN_MAKE_PRIVILEGED_NOTE)
+                                                NOTE__CAN_MAKE_PRIVILEGED_NOTE,
+                                                get_units_visible_to_user)
 
 from .forms import UpdateNoteForm, UpdateLibraryTypeForm, CreateNoteForm
 from .models import Candidate, Appointment
@@ -35,18 +37,21 @@ class CandidateListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CandidateListView, self).get_context_data(**kwargs)
-        context['unfinished'] = Candidate.objects.filter(
+
+        base_qs = self.get_queryset()
+
+        context['unfinished'] = base_qs.filter(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL]
             ).distinct()
 
-        context['pending'] = Candidate.objects.filter(
+        context['pending'] = base_qs.filter(
             appointments__status__in=[
                 Appointment.RECOMMENDED]
             ).distinct()
 
-        context['done'] = Candidate.objects.exclude(
+        context['done'] = base_qs.exclude(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
@@ -58,6 +63,17 @@ class CandidateListView(LoginRequiredMixin, ListView):
                 for libtype in Candidate.LIBRARY_TYPE_CHOICES]
 
         return context
+
+
+    def get_queryset(self):
+        """
+        Limits default queryset to only candidates who have applied for units
+        visible to the end user.
+        """
+        queryset = super(CandidateListView, self).get_queryset()
+        unitlist = get_units_visible_to_user(self.request.user)
+        queryset = queryset.filter(appointments__committee__unit__in=unitlist)
+        return queryset
 
 
 
@@ -146,6 +162,19 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
             instance=self.get_object())
 
         return context
+
+
+    def get_object(self):
+        """
+        Make sure users are only allowed to view candidates if they have
+        relevant permissions, to protect candidate privacy.
+        """
+        obj = super(CandidateDetailView, self).get_object()
+        unitlist = get_units_visible_to_user(self.request.user)
+        if not obj.appointments.filter(unit__in=unitlist):
+            raise PermissionDenied
+
+        return obj
 
 
 
@@ -308,7 +337,6 @@ class AppointmentsView(LoginRequiredMixin, TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        print request.POST
 
         for key, value in request.POST.items():
             if key.startswith('appointment'):
