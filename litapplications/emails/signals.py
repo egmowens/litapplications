@@ -34,31 +34,32 @@ def email_candidate(sender, trigger, candidate, unit, **kwargs):
 def email_new_volunteer(candidate, unit):
     """
     Acknowledge receipt of new volunteer form, if we have not previously
-    acknowledged receipt. This is intended for 'welcome to the system, here is
-    the process' sorts of emails, not 'we got your form, thanks' sorts.
+    acknowledged receipt of an application to this unit. This is intended for
+    'welcome to the system, here is the process' sorts of emails, not 'we got
+    your form, thanks' sorts.
 
     This will send whatever emails are attached to the NEW_VOLUNTEER_FORM
     trigger.
     """
+    # 1) Can we email this candidate?
     if not candidate.email:
-        # If we don't have an email address for this candidate, we're not going
-        # to be able to send emails, so there's no point in going further.
         return
 
-    if not candidate.form_date >= date.today() - timedelta(days=30):
-        # Don't actally send this email unless the form submission was in the
-        # past month; we don't want to inadvertently send welcome emails to
-        # people who volunteered years ago.
+    # 2) Should we email this candidate? (Have they recently applied to a
+    # committee attached to this unit?)
+    recently = date.today() - timedelta(days=30)
+    eligible_appts = candidate.appointments.filter(
+        form_date__gte=recently, unit=unit)
+    if not eligible_appts:
         return
 
-    # Hopefully there's just one of these, but we haven't enforced that in the
-    # db.
+    # (Hopefully there's just one emailtype, but we haven't enforced that in the
+    # db.)
     emailtypes = EmailType.objects.filter(trigger=NEW_VOLUNTEER_FORM, unit=unit)
 
+    # 3) Have we already emailed this candidate? If not, we can, should, and
+    # will send email!
     for emailtype in emailtypes:
-        # If we've already sent an email of this type to this address, don't
-        # resend. It's intended to be sent only once, not to acknowledge
-        # receipt each time.
         if EmailMessage.objects.filter(
             emailtype=emailtype,
             address=candidate.email):
