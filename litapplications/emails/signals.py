@@ -49,7 +49,7 @@ def email_new_volunteer(candidate, unit):
     # committee attached to this unit?)
     recently = date.today() - timedelta(days=30)
     eligible_appts = candidate.appointments.filter(
-        form_date__gte=recently, unit=unit)
+        form_date__gte=recently, committee__unit=unit)
     if not eligible_appts:
         return
 
