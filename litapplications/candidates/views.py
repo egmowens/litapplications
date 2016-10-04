@@ -1,5 +1,6 @@
 from guardian.core import ObjectPermissionChecker
 import logging
+import re
 
 from django import forms
 from django.contrib import messages
@@ -7,7 +8,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import render
 from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, CreateView
@@ -74,6 +77,72 @@ class CandidateListView(LoginRequiredMixin, ListView):
         unitlist = get_units_visible_to_user(self.request.user)
         queryset = queryset.filter(appointments__committee__unit__in=unitlist)
         return queryset
+
+
+    def post(self, request, *args, **kwargs):
+        """
+        Find candidates matching the input data, per the approach in
+        http://julienphalip.com/post/2825034077/adding-search-to-a-django-site-in-a-snap.
+        """
+        base_input = request.POST['searchbox']
+        if not base_input:
+            messages.add_message(request, messages.WARNING,
+                'Please enter a search term.')
+            return HttpResponseRedirect(reverse_lazy('candidates:list'))
+
+        # First, find the terms and quoted strings.
+        find_terms = re.compile(r'"([^"]+)"|(\S+)').findall
+        remove_extra_spaces = re.compile(r'\s{2,}').sub
+
+        terms = [remove_extra_spaces(' ', (t[0] or t[1]).strip().strip(','))
+            for t in find_terms(base_input)]
+
+        search_fields = ['resume', 'ala_appointments', 'other_info',
+                         'memberships', 'notes__text']
+
+        # Construct our search term.
+        for term in terms:
+            or_query = None
+            for field_name in search_fields:
+                query = Q(**{"%s__icontains" % field_name: term})
+                if or_query is None:
+                    or_query = query
+                else:
+                    or_query = or_query | query
+
+        if or_query:
+            # Note that the Django ORM protects against SQL injection attacks.
+            results = Candidate.objects.filter(or_query)
+        else:
+            results = Candidate.objects.all()
+
+        context = {}
+
+        context['unfinished'] = results.filter(
+            appointments__status__in=[
+                Appointment.APPLICANT,
+                Appointment.POTENTIAL]
+            ).distinct()
+
+        context['pending'] = results.filter(
+            appointments__status__in=[
+                Appointment.RECOMMENDED]
+            ).distinct()
+
+        context['done'] = results.exclude(
+            appointments__status__in=[
+                Appointment.APPLICANT,
+                Appointment.POTENTIAL,
+                Appointment.RECOMMENDED]
+            ).exclude(appointments=None).distinct()
+
+        context['library_key'] = \
+            [(libtype[1], Candidate.LIBRARY_TYPE_IMAGES[libtype[0]])
+                for libtype in Candidate.LIBRARY_TYPE_CHOICES]
+
+        return render(request,
+                      'candidates/candidate_list.html',
+                      context=context)
 
 
 

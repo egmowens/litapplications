@@ -1,6 +1,50 @@
 {% extends 'base.html' %}
+{% block extra_css %}
+  <style type="text/css">
+    #searchbox {
+      border-top-left-radius: 17px;
+      border-bottom-left-radius: 17px;
+      border-right: none;
+    }
+
+    .input-group-btn .btn {
+      border-top-right-radius: 17px;
+      border-bottom-right-radius: 17px;
+      border-left: none;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+      font-size: 20px;
+      padding-top: 3px;
+      padding-bottom: 1px;
+    }
+
+    .input-group-btn .btn:hover {
+      background-color: #337ab7;
+    }
+
+    .input-group-btn .btn:hover span.text-primary{
+      color: white;
+    }
+  </style>
+{% endblock extra_css %}
 
 {% block content %}
+<div class="row">
+  <div class="col-xs-12 col-md-10 col-md-offset-1">
+    <form method="POST">
+      {% csrf_token %}
+      <label for="searchbox" class="sr-only">Search candidates for...</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="searchbox" name="searchbox" placeholder='APALA, "event planning", communications, ...'>
+        <div class="input-group-btn">
+          <button class="btn btn-default" type="submit">
+            <span class="glyphicon glyphicon-search text-primary"></span>
+          </button>
+        </div>
+      </div>
+    </form>    
+  </div>
+</div>
+
 <div class="row">
   <div class="col-xs-12 col-sm-4">
     <h2>Incomplete</h2>
