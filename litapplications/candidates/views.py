@@ -73,9 +73,9 @@ class CandidateListView(LoginRequiredMixin, ListView):
         Limits default queryset to only candidates who have applied for units
         visible to the end user.
         """
-        queryset = super(CandidateListView, self).get_queryset()
         unitlist = get_units_visible_to_user(self.request.user)
-        queryset = queryset.filter(appointments__committee__unit__in=unitlist)
+        queryset = Candidate.objects.filter(
+            appointments__committee__unit__in=unitlist)
         return queryset
 
 
