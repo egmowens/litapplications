@@ -9,7 +9,7 @@ DATABASES['default'].update(db_from_env)
 
 ALLOWED_HOSTS = ['morning-eyrie-79104.herokuapp.com']
 
-STATICFILES_STORAGE = 'whitenoise.django.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 DEBUG = False
 
