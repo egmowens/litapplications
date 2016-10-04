@@ -228,6 +228,7 @@ class Appointment(models.Model):
         verbose_name_plural = "Appointments"
         unique_together = (("candidate", "committee"),)
         ordering = ['form_date', 'committee']
+        get_latest_by = 'form_date'
 
 
     def __str__(self):
