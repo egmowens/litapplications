@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import logging
 
 from django.dispatch import receiver, Signal
 
@@ -7,6 +8,8 @@ from .models import (EmailType,
                      NEW_VOLUNTEER_FORM)
 
 
+logger = logging.getLogger(__name__)
+
 # Any code that wants email to be sent should send this signal.
 signal_send_email = Signal(providing_args=["trigger", "candidate", "unit"])
 
@@ -14,6 +17,7 @@ signal_send_email = Signal(providing_args=["trigger", "candidate", "unit"])
 # functions for fulfillment.
 @receiver(signal_send_email)
 def email_candidate(sender, trigger, candidate, unit, **kwargs):
+    logger.info('Email new candidate signal received')
     if trigger == NEW_VOLUNTEER_FORM:
         email_new_volunteer(candidate, unit)
 
@@ -41,8 +45,13 @@ def email_new_volunteer(candidate, unit):
     This will send whatever emails are attached to the NEW_VOLUNTEER_FORM
     trigger.
     """
+    logger.info('Trying to email {candidate} for {unit} on receipt of '
+        'NEW_VOLUNTEER_FORM trigger'.format(candidate=candidate, unit=unit))
+
     # 1) Can we email this candidate?
     if not candidate.email:
+        logger.warning("Couldn't find email address; not emailing "
+            "{candidate}".format(candidate=candidate))
         return
 
     # 2) Should we email this candidate? (Have they recently applied to a
@@ -51,6 +60,8 @@ def email_new_volunteer(candidate, unit):
     eligible_appts = candidate.appointments.filter(
         form_date__gte=recently, committee__unit=unit)
     if not eligible_appts:
+        logger.info('No eligible appointments; not emailing {candidate}'.format(
+            candidate=candidate))
         return
 
     # (Hopefully there's just one emailtype, but we haven't enforced that in the
@@ -64,7 +75,8 @@ def email_new_volunteer(candidate, unit):
             emailtype=emailtype,
             address=candidate.email):
 
-            pass
+            logger.info('{candidate} has already been emailed; not '
+                'emailing'.format(candidate=candidate))
 
         else:
             # This might send an email to the same candidate more than once,
@@ -78,3 +90,5 @@ def email_new_volunteer(candidate, unit):
             email.last_name = candidate.last_name
             email.emailtype = emailtype
             email.save()
+            logger.info('Email message constructed for {candidate}'.format(
+                candidate=candidate))
