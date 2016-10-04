@@ -98,7 +98,7 @@ def ingest_file(request, file_obj):
             return
 
         try:
-            appointment = Appointment.objects.get(
+            appointment = Appointment.even_obsolete.get(
                 committee=committee, candidate=candidate)
         except Appointment.DoesNotExist:
             appointment = Appointment()
