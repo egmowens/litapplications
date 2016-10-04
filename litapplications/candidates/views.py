@@ -171,7 +171,7 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
         """
         obj = super(CandidateDetailView, self).get_object()
         unitlist = get_units_visible_to_user(self.request.user)
-        if not obj.appointments.filter(unit__in=unitlist):
+        if not obj.appointments.filter(committee__unit__in=unitlist):
             raise PermissionDenied
 
         return obj
