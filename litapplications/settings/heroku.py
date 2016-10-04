@@ -9,8 +9,10 @@ DATABASES['default'].update(db_from_env)
 
 ALLOWED_HOSTS = ['morning-eyrie-79104.herokuapp.com']
 
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.django.CompressedManifestStaticFilesStorage'
 
 DEBUG = False
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', None)
+
+MIDDLEWARE_CLASSES.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
