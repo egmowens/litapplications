@@ -4,16 +4,20 @@ from django.db import models
 
 APPOINTMENT__CAN_RECOMMEND = 'appointment__can_recommend'
 APPOINTMENT__CAN_FINALIZE = 'appointment__can_finalize'
+APPOINTMENT__CAN_SEE = 'appointment__can_see'
 EMAIL__CAN_SEND = 'email__can_send'
 NOTE__CAN_MAKE_CANDIDATE_NOTE = 'note__can_make_candidate_note'
 NOTE__CAN_MAKE_PRIVILEGED_NOTE = 'note__can_make_privileged_note'
+NOTE__CAN_SEE = 'note__can_see'
 
 # People with any of the following permissions should be able to see candidates
 # with appropriately permissioned appointments or notes.
 SHOULD_SEE_CANDIDATES = [APPOINTMENT__CAN_RECOMMEND,
                          APPOINTMENT__CAN_FINALIZE,
+                         APPOINTMENT__CAN_SEE,
                          NOTE__CAN_MAKE_CANDIDATE_NOTE,
-                         NOTE__CAN_MAKE_PRIVILEGED_NOTE]
+                         NOTE__CAN_MAKE_PRIVILEGED_NOTE,
+                         NOTE__CAN_SEE]
 
 
 def get_units_visible_to_user(user):
@@ -48,12 +52,16 @@ class Unit(models.Model):
                 'Can recommend appointments to unit committees'),
             (APPOINTMENT__CAN_FINALIZE,
                 'Can finalize appointments to unit committees'),
+            (APPOINTMENT__CAN_SEE,
+                'Can see (but not change) appointments to unit committees'),
             (EMAIL__CAN_SEND,
                 'Can send email for unit-specific triggers'),
             (NOTE__CAN_MAKE_CANDIDATE_NOTE,
                 'Can make notes on candidates for unit committees'),
             (NOTE__CAN_MAKE_PRIVILEGED_NOTE,
                 'Can make privileged notes on candidates for unit committees'),
+            (NOTE__CAN_SEE,
+                'Can see (but not change) notes on candidates for unit committees'),
         )
 
 
