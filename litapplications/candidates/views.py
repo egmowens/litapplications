@@ -21,6 +21,7 @@ from litapplications.committees.models.committees import Committee
 from litapplications.committees.models.units import (Unit,
                                                 NOTE__CAN_MAKE_CANDIDATE_NOTE,
                                                 NOTE__CAN_MAKE_PRIVILEGED_NOTE,
+                                                NOTE__CAN_SEE,
                                                 get_units_visible_to_user)
 
 from .forms import UpdateNoteForm, UpdateLibraryTypeForm, CreateNoteForm
@@ -158,14 +159,18 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
         checker = ObjectPermissionChecker(self.request.user)
 
         notes_forms = []
+        notes_display = []
         for note in notes:
             if checker.has_perm(NOTE__CAN_MAKE_CANDIDATE_NOTE, note.unit):
                 update_form = UpdateNoteForm(instance=note)
                 update_form.fields['text'].label = 'Note for {unit}'.format(
                     unit=note.unit)
                 notes_forms.append(update_form)
+            elif checker.has_perm(NOTE__CAN_SEE, note.unit):
+                notes_display.append(note)
 
         context['notes_forms'] = notes_forms
+        context['notes_display'] = notes_display
 
         unnoted_units = []
         for unit in Unit.objects.all():
