@@ -294,7 +294,9 @@ class UpdateStatusView(LoginRequiredMixin, View):
         except Committee.DoesNotExist:
             # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Tried to update status for nonexistent committee')
-            return HttpResponseBadRequest()
+            messages.add_message(request, messages.WARNING, 'Could not find '
+                'committee; no statuses changed.')
+            return HttpResponseRedirect('committees:detail')
 
         try:
             assert 'candidates' in request.POST
@@ -317,14 +319,20 @@ class UpdateStatusView(LoginRequiredMixin, View):
         except (AssertionError, ValueError):
             # ValueError will be raised if the status cannot be cast to int.
             logger.exception('Did not find valid data for batch editing')
-            return HttpResponseBadRequest()
+            messages.add_message(request, messages.WARNING, 'That status was '
+                'not valid; no statuses changed.')
+            return HttpResponseRedirect('committees:detail')
 
         for candidate_pk in request.POST.getlist('candidates'):
             try:
                 candidate = Candidate.objects.get(pk=candidate_pk)
             except Candidate.DoesNotExist:
-                logger.exception('Could not find app with posted pk {pk}; '
-                    'continuing through remaining apps'.format(pk=candidate_pk))
+                logger.exception('Could not find candidate with posted pk '
+                    '{pk}; continuing through remaining candidates'.format(
+                        pk=candidate_pk))
+                messages.add_message(request, messages.WARNING, 'Could not '
+                    'find candidate #{pk}; no statuses changed for that '
+                    'candidate'.format(pk=candidate_pk))
                 continue
 
             try:
@@ -335,11 +343,12 @@ class UpdateStatusView(LoginRequiredMixin, View):
                 if appointment.status in settable_statuses:
                     appointment.status = status
                 appointment.save()
-            except:
-                logger.exception('Could not find appointment for candidate '
-                    '{candidate} and committee {committee}; status not '
-                    'set'.format(candidate=candidate, committee=committee))
-                return HttpResponseBadRequest()
+            except Appointment.DoesNotExist:
+                msg = 'Could not find appointment for candidate ' \
+                      '{candidate} and committee {committee}; status not ' \
+                      'set'.format(candidate=candidate, committee=committee)
+                logger.exception(msg)
+                messages.add_message(request, messages.WARNING, msg)
 
         messages.add_message(request, messages.SUCCESS,
             'Update successful. Thank you for working on appointments today!')

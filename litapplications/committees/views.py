@@ -35,34 +35,45 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
         context = super(CommitteeDetailView, self).get_context_data(**kwargs)
         obj = self.get_object()
         context['applicants'] = Candidate.objects.filter(
+            # We need to make sure to remove all the appointments removed by
+            # the default manager - they aren't removed when we filter the
+            # Candidate queryset!
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.APPLICANT,
             appointments__committee=obj).distinct()
 
         context['potential'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.POTENTIAL,
             appointments__committee=obj).distinct()
 
         context['recommended'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.RECOMMENDED,
             appointments__committee=obj).distinct()
 
         context['sent'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.SENT,
             appointments__committee=obj).distinct()
 
         context['accepted'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.ACCEPTED,
             appointments__committee=obj).distinct()
 
         context['not_recommended'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.NOPE,
             appointments__committee=obj).distinct()
 
         context['declined'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.DECLINED,
             appointments__committee=obj).distinct()
 
         context['candidates'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
             appointments__committee=obj).distinct()
 
         # For constructing the dropdown in the batch editing form.
