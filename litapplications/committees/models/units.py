@@ -9,6 +9,7 @@ EMAIL__CAN_SEND = 'email__can_send'
 NOTE__CAN_MAKE_CANDIDATE_NOTE = 'note__can_make_candidate_note'
 NOTE__CAN_MAKE_PRIVILEGED_NOTE = 'note__can_make_privileged_note'
 NOTE__CAN_SEE = 'note__can_see'
+COMMITTEE__CAN_CREATE = 'committee__can_create'
 
 # People with any of the following permissions should be able to see candidates
 # with appropriately permissioned appointments or notes.
@@ -32,6 +33,17 @@ def get_units_visible_to_user(user):
         unitlist.extend(units)
     unitlist = list(set(unitlist)) # Make distinct
     return unitlist
+
+
+def get_privileged_units(user):
+    """
+    Given a user, return the set of units for which that user can create
+    committees.
+    """
+    units = get_objects_for_user(user,
+        'committees.{perm}'.format(perm=COMMITTEE__CAN_CREATE))
+    return units
+
 
 class Unit(models.Model):
     """
@@ -62,6 +74,8 @@ class Unit(models.Model):
                 'Can make privileged notes on candidates for unit committees'),
             (NOTE__CAN_SEE,
                 'Can see (but not change) notes on candidates for unit committees'),
+            (COMMITTEE__CAN_CREATE,
+                'Can create committees belonging to this unit')
         )
 
 

@@ -11,4 +11,8 @@ urlpatterns = [
         name='update_numbers'),
     url(r'^(?P<pk>\d+)/update/owner/$', views.UpdateOwnerView.as_view(),
         name='update_owner'),
+    url(r'^new/',
+        views.CommitteeCreateView.as_view(),
+        {'new_committees': None},
+        name='create'),
 ]

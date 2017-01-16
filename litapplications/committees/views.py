@@ -3,15 +3,18 @@ import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
+from django.forms import modelformset_factory
+from django.forms.widgets import TextInput, Select
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.views.generic.base import View
+from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
 
 from litapplications.candidates.models import Candidate, Appointment
+from litapplications.committees.models.units import get_privileged_units
 
-from .forms import UpdateNotesForm, UpdateNumbersForm
+from .forms import UpdateNotesForm, UpdateNumbersForm, CommitteeCreateForm
 from .models.committees import Committee
 
 logger = logging.getLogger(__name__)
@@ -157,3 +160,80 @@ class UpdateOwnerView(LoginRequiredMixin, View):
             'today!'.format(committee=committee))
 
         return HttpResponseRedirect(reverse_lazy('committees:list'))
+
+
+
+class CommitteeCreateView(LoginRequiredMixin, TemplateView):
+    new_committees = None
+    template_name = 'committees/committee_multiple_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not (self.request.user.is_superuser or
+                self.request.user.groups.filter(name='Chairs')):
+            messages.add_message(request, messages.INFO,
+                'Sorry; you need additional permissions to access that page.')
+            return HttpResponseRedirect(reverse_lazy('home'))
+        return super(CommitteeCreateView, self).dispatch(
+            request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        context = super(CommitteeCreateView, self).get_context_data(**kwargs)
+        privileged_units = get_privileged_units(self.request.user)
+        unit_choices = [(unit.id, unit) for unit in privileged_units]
+
+        if self.new_committees:
+            CommitteeFormSet = modelformset_factory(Committee,
+                form=CommitteeCreateForm,
+                widgets={'short_code': TextInput(attrs={'readonly': True}),
+                         'unit': Select(choices=unit_choices)
+                        },
+                extra=len(self.new_committees))
+            initial_data = [{'short_code': short_code}
+                            for short_code in self.new_committees]
+            formset = CommitteeFormSet(
+                        initial=initial_data,
+                        queryset=Committee.objects.none())
+            form_count = formset.total_form_count()
+            context['formset'] = formset
+        else:
+            form = CommitteeCreateForm()
+            form_count = 1
+            context['form'] = form
+
+        context['form_count'] = form_count # Used to pluralize header.
+
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        CommitteeFormSet = modelformset_factory(Committee,
+            form=CommitteeCreateForm)
+
+        if 'form-TOTAL_FORMS' in request.POST:
+            # It had a management form, so it was a formset; use formset logic.
+            formset = CommitteeFormSet(request.POST)
+
+            if formset.is_valid():
+                formset.save()
+                messages.add_message(request, messages.SUCCESS,
+                    'Committee(s) created. You should reimport your data files'
+                    'if you were trying to import potential appointments to '
+                    'those committees.')
+                return HttpResponseRedirect(reverse_lazy('data_ingest'))
+            else:
+                return self.render_to_response(
+                    self.get_context_data(formset=formset))
+        else:
+            form = CommitteeCreateForm(request.POST)
+
+            if form.is_valid():
+                form.save()
+                messages.add_message(request, messages.SUCCESS,
+                    'Committee created. You should reimport your data files'
+                    'if you were trying to import potential appointments to '
+                    'those committees.')
+                return HttpResponseRedirect(reverse_lazy('data_ingest'))
+            else:
+                return self.render_to_response(
+                    self.get_context_data(form=form))

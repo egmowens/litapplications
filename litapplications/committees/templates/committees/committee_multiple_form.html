@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Create New Committee{{ form_count|pluralize }}</h1>
+  <form method="post" action="{% url 'committees:create' %}">
+    {% csrf_token %}
+    {% if formset %}
+      {% include "committees/new_formset.html" %}
+    {% else %}
+      {% include "committees/new_form.html" %}
+    {% endif %}
+    <input type="submit" value="Add committee{{ form_count|pluralize }}" class="btn btn-primary" />
+  </form>
+{% endblock content %}

@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import time
 
-from django.contrib import messages
+from django.core.urlresolvers import reverse
 
 from litapplications.candidates.models import Candidate, Appointment
 from litapplications.committees.models.committees import Committee
@@ -39,8 +39,17 @@ PROPOSED = 'PROPOSED'
 COMMITTEE = 'COMMITTEE'
 STATUSES = [APPLICANT, PROPOSED, COMMITTEE]
 
+class IngestResponse(object):
+    def __init__(self, warnings, new_committees, *args, **kwargs):
+        super(IngestResponse, self).__init__(*args, **kwargs)
+        self.warnings = warnings
+        self.new_committees = new_committees
+
+
+
 def ingest_file(request, file_obj):
     warnings = []
+    new_committees = []
 
     def _update_fields(candidate, entity):
         candidate.first_name = entity[FIRST_NAME_KEY]
@@ -84,17 +93,18 @@ def ingest_file(request, file_obj):
             warnings.append('Candidate {candidate} has changed names - '
                 'verify info is correct'.format(candidate=candidate))
 
-        # Find the referenced committee (and don't do anything if we can't)
-        committee_code = entity[COMMITTEE_KEY]
+        # Find the referenced committee; if we can't, direct them to create
+        # the committee and re-upload the file.
+        comm_key = entity[COMMITTEE_KEY]
+        committee_code = comm_key
 
         try:
             committee = Committee.objects.filter(
-                short_code__iexact=committee_code)[0] #case insensitive
+                short_code__iexact=committee_code)[0] # case insensitive
         except IndexError:
             logger.exception('Could not find committee for {key}'.format(
-                key=entity[COMMITTEE_KEY]))
-            warnings.append('Could not find committee for {key}'.format(
-                key=entity[COMMITTEE_KEY]))
+                key=comm_key))
+            new_committees.append(comm_key)
             return
 
         try:
@@ -138,9 +148,11 @@ def ingest_file(request, file_obj):
 
     parse_file(file_obj)
 
-    if warnings:
-        for warning in warnings:
-            messages.add_message(request, messages.WARNING, warning)
-    else:
-        messages.add_message(request, messages.SUCCESS, 'All data processed :D')
+    resp = IngestResponse(
+                warnings=warnings,
+                new_committees=new_committees
+           )
+
+    return resp
+
 
