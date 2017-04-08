@@ -215,14 +215,31 @@ class CandidateDetailView(LoginRequiredMixin, DetailView):
             create_form.fields['candidate'].widget = forms.HiddenInput()
             context['special_create_form'] = create_form
 
-        context['committees'] = Committee.objects.filter(
-            appointments__candidate=obj,
-            appointments__status__in=[
-                Appointment.APPLICANT,
-                Appointment.POTENTIAL,
-                Appointment.RECOMMENDED,
-                Appointment.SENT
-            ]).distinct()
+        committees = {}
+        committees['sent'] = Committee.objects.filter(
+            appointments__in=Appointment.objects.filter(
+                candidate=obj, status=Appointment.SENT
+            )
+        ).distinct()
+        committees['recced'] = Committee.objects.filter(
+            appointments__in=Appointment.objects.filter(
+                candidate=obj, status=Appointment.RECOMMENDED
+            )
+        ).distinct()
+        committees['maybe'] = Committee.objects.filter(
+            appointments__in=Appointment.objects.filter(
+                candidate=obj, status__in=[
+                    Appointment.APPLICANT,
+                    Appointment.POTENTIAL]
+            )
+        ).distinct()
+        committees['nope'] = Committee.objects.filter(
+            appointments__in=Appointment.objects.filter(
+                candidate=obj, status=Appointment.DECLINED
+            )
+        ).distinct()
+
+        context['committees'] = committees
 
         context['other_committees'] = Committee.objects.exclude(
             appointments__candidate=obj).distinct()

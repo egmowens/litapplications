@@ -75,20 +75,53 @@
           <h3 class="panel-title">Under consideration for...</h3>
         </div>
         <div class="panel-body">
+          <h4>Sent</h4>
           <ul class="list-unstyled">
-            {% for committee in committees %}
+            {% for committee in committees.sent %}
               <li>
                 <a href="{{ committee.get_absolute_url }}">
                   {{ committee }}
-                </a>                
+                </a>
               </li>
             {% endfor %}
           </ul>
-          {% if committees %}
-            <p><em>
-              Set status on the committee page.
-            </em></p>
-          {% endif %}
+          <hr/>
+          <h4>Recommended</h4>
+          <ul class="list-unstyled">
+            {% for committee in committees.recced %}
+              <li>
+                <a href="{{ committee.get_absolute_url }}">
+                  {{ committee }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <hr/>
+          <h4>Applicant/potential</h4>
+          <ul class="list-unstyled">
+            {% for committee in committees.maybe %}
+              <li>
+                <a href="{{ committee.get_absolute_url }}">
+                  {{ committee }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <hr/>
+          <h4>Interested but not recommended</h4>
+          <ul class="list-unstyled">
+            {% for committee in committees.nope %}
+              <li>
+                <a href="{{ committee.get_absolute_url }}">
+                  {{ committee }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <hr/>
+          <p><em>
+            Set status on the committee page.
+          </em></p>
         </div>
       </div>      
     </div>
