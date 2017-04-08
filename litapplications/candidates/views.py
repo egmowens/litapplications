@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
-from django.db.models import Q
+from django.db.models import Q, Count, Case, When
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import View, TemplateView
@@ -44,23 +44,36 @@ class CandidateListView(LoginRequiredMixin, ListView):
 
         base_qs = self.get_queryset()
 
-        context['unfinished'] = base_qs.filter(
-            appointments__status__in=[
-                Appointment.APPLICANT,
-                Appointment.POTENTIAL]
-            ).distinct()
+        # Annotate the candidate set by the number of current appointments the
+        # candidate already has. This allows us to filter for people who are
+        # unrecognized or overloaded, thereby making sure we involve everyone
+        # appropriately.
+        annotated_qs = base_qs.annotate(
+            appt_count=Count(
+                Case(When(
+                        appointments__status__in=[
+                            Appointment.RECOMMENDED,
+                            Appointment.SENT,
+                            Appointment.ACCEPTED],
+                    then=1)
+                )
+            )
+        )
 
-        context['pending'] = base_qs.filter(
+        context['lonely'] = annotated_qs.filter(
+            appt_count=0 # no appointments yet :(
+        ).filter(
+            # BUT limit to people who still have options on the table - this
+            # view shouldn't include people who have declined appointments or
+            # been not-recommended by the committee.
             appointments__status__in=[
-                Appointment.RECOMMENDED]
-            ).distinct()
+                Appointment.APPLICANT, Appointment.POTENTIAL
+            ]
+        )
 
-        context['done'] = base_qs.exclude(
-            appointments__status__in=[
-                Appointment.APPLICANT,
-                Appointment.POTENTIAL,
-                Appointment.RECOMMENDED]
-            ).exclude(appointments=None).distinct()
+        context['involved'] = annotated_qs.filter(appt_count=1)
+
+        context['overloaded'] = annotated_qs.filter(appt_count__gte=2)
 
         context['library_key'] = \
             [(libtype[1], Candidate.LIBRARY_TYPE_IMAGES[libtype[0]])
@@ -76,7 +89,11 @@ class CandidateListView(LoginRequiredMixin, ListView):
         """
         unitlist = get_units_visible_to_user(self.request.user)
         queryset = Candidate.objects.filter(
-            appointments__committee__unit__in=unitlist)
+            appointments__committee__unit__in=unitlist,
+            # Django uses the all-objects manager, not our custom default
+            # manager, in this lookup; we need to force it to limit itself to
+            # candidates with appointments in the custom default set.
+            appointments__in=Appointment.objects.all())
         return queryset
 
 

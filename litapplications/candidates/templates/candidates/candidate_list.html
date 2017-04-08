@@ -47,19 +47,18 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-4">
-    <h2>Incomplete</h2>
+    <h2>Needs attention</h2>
 
     <div class="row">
       <div class="col-xs-12 col-sm-10">
         <em>
-          These candidates have one or more appointments that haven't yet been
-          finalized (either 'recommended' or 'not recommended').
+          These candidates are interested in serving, but haven't been appointed to anything, or recommended for an appointment yet.
         </em>
         <hr />
       </div>     
     </div>
 
-    {% for candidate in unfinished %}
+    {% for candidate in lonely %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% empty %}
       <p>
@@ -72,37 +71,37 @@
   </div>
 
   <div class="col-xs-12 col-sm-4">
-    <h2>Pending</h2>
+    <h2>Involved {% if involved %}&#127881;{% endif %}</h2>
     
     <div class="row">
       <div class="col-xs-12 col-sm-10">
         <em>
-          The committee has recommended these candidates be appointed to one or
-          more committees &mdash; good job! Either the VP needs to send them an appointment letter, or we're waiting to hear back
-          on whether they'll accept the appointment.
+          The committee has recommended these candidates be appointed to one committee, or they're already serving on one &mdash; good job!
         </em>
         <hr />
       </div>     
     </div>
 
-    {% for candidate in pending %}
+    {% for candidate in involved %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% endfor %}
   </div>
 
   <div class="col-xs-12 col-sm-4">
-    <h2>Done! {% if done %}&#127881;{% endif %}</h2>
+    <h2>Overloaded?</h2>
 
     <div class="row">
       <div class="col-xs-12 col-sm-10">
         <em>
-          Aw yeah.
+          These candidates have been recommended for, or are serving on, more
+          than one committee; consider shifting an appointment to someone else
+          who isn't involved yet.
         </em>
         <hr />
       </div>     
     </div>
     
-    {% for candidate in done %}
+    {% for candidate in overloaded %}
       <a href="{{ candidate.get_absolute_url }}">{{ candidate.get_html_name }}</a><br />
     {% endfor %}
   </div>
