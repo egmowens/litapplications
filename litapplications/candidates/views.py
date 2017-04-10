@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from guardian.core import ObjectPermissionChecker
 import logging
 import re
@@ -8,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse_lazy
-from django.db.models import Q, Count, Case, When
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import View, TemplateView
@@ -44,36 +45,14 @@ class CandidateListView(LoginRequiredMixin, ListView):
 
         base_qs = self.get_queryset()
 
-        # Annotate the candidate set by the number of current appointments the
-        # candidate already has. This allows us to filter for people who are
-        # unrecognized or overloaded, thereby making sure we involve everyone
-        # appropriately.
-        annotated_qs = base_qs.annotate(
-            appt_count=Count(
-                Case(When(
-                        appointments__status__in=[
-                            Appointment.RECOMMENDED,
-                            Appointment.SENT,
-                            Appointment.ACCEPTED],
-                    then=1)
-                )
-            )
+        context['lonely'] = base_qs.filter(
+            _current_appointments=0 # no appointments yet :(
         )
 
-        context['lonely'] = annotated_qs.filter(
-            appt_count=0 # no appointments yet :(
-        ).filter(
-            # BUT limit to people who still have options on the table - this
-            # view shouldn't include people who have declined appointments or
-            # been not-recommended by the committee.
-            appointments__status__in=[
-                Appointment.APPLICANT, Appointment.POTENTIAL
-            ]
-        )
+        context['involved'] = base_qs.filter(_current_appointments=1)
 
-        context['involved'] = annotated_qs.filter(appt_count=1)
-
-        context['overloaded'] = annotated_qs.filter(appt_count__gte=2)
+        context['overloaded'] = base_qs.filter(
+            _current_appointments__gte=2).order_by('-_current_appointments')
 
         context['library_key'] = \
             [(libtype[1], Candidate.LIBRARY_TYPE_IMAGES[libtype[0]])
@@ -85,16 +64,14 @@ class CandidateListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """
         Limits default queryset to only candidates who have applied for units
-        visible to the end user.
+        visible to the end user; annotates candidates with their number of
+        recommended or actual appointments.
         """
         unitlist = get_units_visible_to_user(self.request.user)
-        queryset = Candidate.objects.filter(
+
+        return Candidate.objects.filter(
             appointments__committee__unit__in=unitlist,
-            # Django uses the all-objects manager, not our custom default
-            # manager, in this lookup; we need to force it to limit itself to
-            # candidates with appointments in the custom default set.
-            appointments__in=Appointment.objects.all())
-        return queryset
+        )
 
 
     def post(self, request, *args, **kwargs):

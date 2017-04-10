@@ -91,6 +91,10 @@ class Candidate(models.Model):
     last_updated = models.DateField(auto_now=True)
     library_type = models.IntegerField(choices=LIBRARY_TYPE_CHOICES,
         default=TYPE_UNKNOWN)
+    # This is the number of recommended, accepted, or sent appointments. It is
+    # set on Appointment.save() and powers the Candidate list page; a bug not
+    # fixed until 1.11 prevents us from just counting via queryset filters.
+    _current_appointments = models.IntegerField(default=0)
 
     class Meta:
         verbose_name = "Candidate"
@@ -156,6 +160,10 @@ class Candidate(models.Model):
             return self.appointments.latest().form_date
         except Appointment.DoesNotExist:
             return None
+
+    @property
+    def appointment_count(self):
+        return self._current_appointments
 
 
     #
@@ -229,6 +237,17 @@ class Appointment(models.Model):
         unique_together = (("candidate", "committee"),)
         ordering = ['form_date', 'committee']
         get_latest_by = 'form_date'
+
+    def save(self, *args, **kwargs):
+        super(Appointment, self).save(*args, **kwargs)
+        self.candidate._current_appointments = \
+            Appointment.even_obsolete.filter(
+                candidate=self.candidate,
+                status__in=[
+                    Appointment.RECOMMENDED,
+                    Appointment.SENT,
+                    Appointment.ACCEPTED]
+            ).count()
 
 
     def __str__(self):
