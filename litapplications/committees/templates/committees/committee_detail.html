@@ -10,6 +10,7 @@ Name, link to charge, notes on requirements (entered by committee member),
 
 {% block content %}
   <h1>{{ object }} <span class="small">{{ object.short_code }}</span></h1>
+  {% include "committees/_year_limiting_form.html" %}
 
   <ul class="list-unstyled">
     <li>
@@ -46,6 +47,17 @@ Name, link to charge, notes on requirements (entered by committee member),
             {{ numbers_form | crispy }}
             <input type="submit" value="update numbers" class="btn btn-default">
           </form>
+        </div>
+      </div>      
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Serving during {{ view_by_year }}
+        </div>
+        <div class="panel-body">
+          {% for candidate in current %}
+            {{ candidate }}{% if not forloop.last %}, {% endif %}            
+          {% endfor %}
         </div>
       </div>      
     </div>    

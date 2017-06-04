@@ -1,0 +1,10 @@
+  <form method="post" action="" class="form-inline">
+    {% csrf_token %}
+    <div class="form-group">
+        <label>View for appointments starting in year:</label>
+        <input type="number" name="year" min="2000" max="3000">
+    </div>
+    <input type="submit" class="btn btn-default">
+  </form>
+
+<i>(Currently viewing for year {{ view_by_year }})</i><br /><br />

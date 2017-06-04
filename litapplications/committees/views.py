@@ -1,3 +1,4 @@
+from datetime import date
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -41,43 +42,69 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             # We need to make sure to remove all the appointments removed by
             # the default manager - they aren't removed when we filter the
             # Candidate queryset!
+            # We're also looking for appointments with no start date, because
+            # that means unappointed people. Candidates with start dates have
+            # already been appointed.
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.APPLICANT,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['potential'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.POTENTIAL,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['recommended'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.RECOMMENDED,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['sent'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.SENT,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['accepted'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.ACCEPTED,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['not_recommended'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.NOPE,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['declined'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
             appointments__status=Appointment.DECLINED,
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
 
         context['candidates'] = Candidate.objects.filter(
             appointments__in=Appointment.objects.all(),
-            appointments__committee=obj).distinct()
+            appointments__committee=obj,
+            appointments__year_start=None).distinct()
+
+        try:
+            view_by_year = self.kwargs['year']
+        except KeyError:
+            # Appointments cycle at the beginning of July.
+            today = date.today()
+            view_by_year = today.year if today.month < 7 else today.year + 1
+
+        context['current'] = Candidate.objects.filter(
+            appointments__in=Appointment.objects.all(),
+            appointments__committee=obj,
+            appointments__year_start__lte=view_by_year,
+            appointments__year_end__gt=view_by_year).distinct()
+
+        context['view_by_year'] = view_by_year
 
         # For constructing the dropdown in the batch editing form.
         context['status_choices'] = [choice for choice
@@ -90,7 +117,15 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
-
+    def post(self, request, *args, **kwargs):
+        try:
+            year = int(request.POST['year'])
+            if 2000 <= year <= 3000:
+                return HttpResponseRedirect(
+                    reverse_lazy('committees:detail_by_year',
+                        kwargs={'pk': self.kwargs['pk'], 'year': year}))
+        except KeyError:
+            return HttpResponseRedirect(reverse_lazy('committees:detail'))
 
 class UpdateNotesView(LoginRequiredMixin, UpdateView):
     model = Committee

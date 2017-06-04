@@ -230,6 +230,8 @@ class Appointment(models.Model):
         'candidate to fill out a committee volunteer form, and also you should '
         'be careful of overwriting this.')
     form_date = models.DateField()
+    year_start = models.IntegerField(blank=True, null=True)
+    year_end = models.IntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Appointment"
