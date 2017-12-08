@@ -98,11 +98,7 @@ class CommitteeDetailView(LoginRequiredMixin, DetailView):
             today = date.today()
             view_by_year = today.year if today.month < 7 else today.year + 1
 
-        context['current'] = Candidate.objects.filter(
-            appointments__in=Appointment.objects.all(),
-            appointments__committee=obj,
-            appointments__year_start__lte=view_by_year,
-            appointments__year_end__gt=view_by_year).distinct()
+        context['current'] = obj.members(int(view_by_year) + 1)
 
         context['view_by_year'] = view_by_year
 

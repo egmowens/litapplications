@@ -52,7 +52,7 @@ Name, link to charge, notes on requirements (entered by committee member),
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Serving during {{ view_by_year }}
+          <h3 class="panel-title">Serving during {{ view_by_year }}-{{ view_by_year|add:"1" }}
         </div>
         <div class="panel-body">
           {% for candidate in current %}

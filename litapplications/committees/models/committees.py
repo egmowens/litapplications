@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse_lazy
 from django.db import models
+from django.utils.timezone import now
 
 from litapplications.candidates.models import Appointment
 
@@ -42,10 +43,11 @@ class Committee(models.Model):
     def get_absolute_url(self):
         return reverse_lazy('committees:detail', args=[self.pk])
 
-
+    @property
     def is_fully_appointed(self):
         if (self.appointments.filter(status__in=[
-                Appointment.RECOMMENDED, Appointment.ACCEPTED]
+                Appointment.RECOMMENDED, Appointment.ACCEPTED],
+                year_start__gte=now().year
             ).count() >= self.min_appointees and 
             self.min_appointees is not None):
 
@@ -54,11 +56,31 @@ class Committee(models.Model):
             return False
 
 
+    @property
     def is_fully_staffed(self):
-        if (self.appointments.filter(
-            status__in=[Appointment.ACCEPTED]).count() >= self.min_appointees
+        if (len(self.members()) >= self.min_appointees
             and self.min_appointees is not None):
 
             return True
         else:
             return False
+
+    def members(self, year=None):
+        # If no year is given, return next year's members.
+        if not year:
+            year = Committee.current_ala_year() + 2
+
+        appts = self.appointments.filter(
+            status=Appointment.ACCEPTED,
+            year_start__lt=year,
+            year_end__gte=year)
+
+        return list(set([appt.candidate for appt in appts]))
+
+
+    @staticmethod
+    def current_ala_year():
+        if now().month < 7:
+            return now().year - 1
+        else:
+            return now().year
