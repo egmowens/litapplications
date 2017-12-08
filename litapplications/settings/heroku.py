@@ -15,6 +15,5 @@ DEBUG = False
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', None)
 
-MIDDLEWARE_CLASSES += (
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-)
+# Needs to go before everything except security middleware
+MIDDLEWARE_CLASSES.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
