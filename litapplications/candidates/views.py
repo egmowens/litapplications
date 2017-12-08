@@ -86,7 +86,7 @@ class CandidateListView(LoginRequiredMixin, ListView):
             return HttpResponseRedirect(reverse_lazy('candidates:list'))
 
         # First, find the terms and quoted strings.
-        find_terms = re.compile(r'"([^"]+)"|(\S+)').findall
+        find_terms = re.compile(r'[\'|"]([^"]+)[\'|"]|(\S+)').findall
         remove_extra_spaces = re.compile(r'\s{2,}').sub
 
         terms = [remove_extra_spaces(' ', (t[0] or t[1]).strip().strip(','))
@@ -95,36 +95,28 @@ class CandidateListView(LoginRequiredMixin, ListView):
         search_fields = ['resume', 'ala_appointments', 'other_info',
                          'memberships', 'notes__text']
 
-        # Construct our search term.
+        # Find candidates matching all the desired terms.
+        query = Q()
         for term in terms:
-            or_query = None
-            for field_name in search_fields:
-                query = Q(**{"%s__icontains" % field_name: term})
-                if or_query is None:
-                    or_query = query
-                else:
-                    or_query = or_query | query
-
-        if or_query:
-            # Note that the Django ORM protects against SQL injection attacks.
-            results = Candidate.objects.filter(or_query)
-        else:
-            results = Candidate.objects.all()
+            for field in search_fields:
+                query = query | Q(**{"%s__icontains" % field: term})
+                print query
+        results = Candidate.objects.filter(query)
 
         context = {}
 
-        context['unfinished'] = results.filter(
+        context['lonely'] = results.filter(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL]
             ).distinct()
 
-        context['pending'] = results.filter(
+        context['involved'] = results.filter(
             appointments__status__in=[
                 Appointment.RECOMMENDED]
             ).distinct()
 
-        context['done'] = results.exclude(
+        context['overloaded'] = results.exclude(
             appointments__status__in=[
                 Appointment.APPLICANT,
                 Appointment.POTENTIAL,
